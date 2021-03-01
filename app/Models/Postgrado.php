@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Materia; 
+use App\Models\Nivel; 
+use App\Models\Inscripcion; 
 use Illuminate\Database\Eloquent\Model;
 
 class Postgrado extends Model
@@ -19,4 +22,14 @@ class Postgrado extends Model
     ];
 
     public $timestamps = false;
+    public function materias(){
+        return $this->belongsToMany(Materia::class,'materia_postgrado','postgrado_id','materia_id');
+    }
+
+    public function niveles(){
+        return $this->belongsTo(Nivel::class,'nivel_id');
+    }
+    public function inscripciones(){
+        return $this->belongsTo(Inscripcion::class,'postgrado_id');
+    }
 }

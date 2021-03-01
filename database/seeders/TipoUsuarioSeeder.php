@@ -23,8 +23,8 @@ class TipoUsuarioSeeder extends Seeder
             'descripcion'=>"Personal docente con acceso a ciertos modulos del sistema",
         ]);
         DB::table('tipo_usuarios')->insert([
-            'nombre'=>"Docente",
-            'descripcion'=>"Personal docente con acceso a ciertos modulos del sistema",
+            'nombre'=>"Administrativo",
+            'descripcion'=>"Personal administrativo con acceso a ciertos modulos del sistema",
         ]);
     }
 }

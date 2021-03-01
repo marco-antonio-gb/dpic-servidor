@@ -54,9 +54,9 @@ class PostgraduanteController extends Controller
                 'nombres' => 'required|string|between:2,100',
                 'lugar_nac' => 'required|string|between:2,100',
                 'ci' => 'required|string|max:10|unique:postgraduantes',
-                'ci_ext' => 'required|string|max:5',
+                'ci_ext' => 'required|string|max:15',
                 'celular' => 'required|string|max:9',
-                'telefono' => 'required|string|max:9',
+        
                 'profesion' => 'required|string|max:30',
                 'correo' => 'required|string|email|max:100|unique:postgraduantes',
             ]);
@@ -67,9 +67,7 @@ class PostgraduanteController extends Controller
                     'status_code'=>400
                 ]);
             }
-            Postgraduante::create(array_merge(
-                $validator->validated()
-            ));
+            Postgraduante::create($request->all());
             return response()->json([
                 'success' => true,
                 'message' => 'Postgraduante registrado correctamente',
@@ -109,7 +107,7 @@ class PostgraduanteController extends Controller
         }
     }
 
-    public function update($id)
+    public function update(Request $request, $id)
     {
 
         try {
@@ -119,11 +117,10 @@ class PostgraduanteController extends Controller
                 'nombres' => 'required|string|between:2,100',
                 'lugar_nac' => 'required|string|between:2,100',
                 'ci' => 'required|string|max:10',
-                'ci_ext' => 'required|string|max:5',
+                'ci_ext' => 'required|string|max:15',
                 'celular' => 'required|string|max:9',
-                'telefono' => 'required|string|max:9',
                 'profesion' => 'required|string|max:30',
-                'correo' => 'required|string|email|max:100|unique:postgraduantes',
+                'correo' => 'required ',
             ]);
             if ($validator->fails()) {
                 return response()->json([
@@ -144,7 +141,7 @@ class PostgraduanteController extends Controller
                 'profesion' => $request['profesion'],
                 'correo' => $request['correo'],
             ];
-            $result = Postgraduante::where('idPostgraduante', '=', $id)->update($res_postgraduante);
+            $result = Postgraduante::where('idPostgraduante', '=', $id)->update($request->all());
             return response()->json([
                 'success' => true,
                 'message' => 'Postgraduante Actualizado correctamente',

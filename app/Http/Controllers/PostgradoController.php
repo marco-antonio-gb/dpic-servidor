@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Postgrado;
-use App\Models\Nivel;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -16,6 +15,8 @@ class PostgradoController extends Controller
      */
     public function index()
     {
+        // $articlesConTags = Postgrado::with('materias')->get();
+        // return $articlesConTags;
         try {
             $result = Postgrado::all();
             if (!$result->isEmpty()) {
@@ -50,9 +51,10 @@ class PostgradoController extends Controller
      */
     public function store(Request $request)
     {
+
         try {
             $validator = Validator::make($request->all(), [
-                'nombre' => 'required',
+                'nombre' => 'required|unique:postgrados',
                 'fecha_inicio' => 'required',
                 'fecha_final' => 'required',
                 'cantidad_pagos' => 'required',
@@ -93,13 +95,19 @@ class PostgradoController extends Controller
     public function show($id)
     {
         try {
-            $result = Postgrado::select('postgrados.nombre','postgrados.fecha_inicio','postgrados.cantidad_pagos','postgrados.precio','postgrados.gestion','niveles.nombre AS nivel')->join('niveles','niveles.idNivel','=','postgrados.nivel_id')->where('idPostgrado', '=', $id)->get()->first();
-            
-            if ($result) {
+            // $result = Postgrado::select('postgrados.idPostgrado','postgrados.nombre','postgrados.fecha_inicio','postgrados.cantidad_pagos','postgrados.precio','postgrados.gestion','niveles.nombre AS nivel','niveles.idNivel')->join('niveles','niveles.idNivel','=','postgrados.nivel_id')->where('idPostgrado', '=', $id)->get()->first();
+            $postgrado = Postgrado::find($id);
+
+            if ($postgrado) {
+                $postgrado->materias;
+                $postgrado->niveles;
                 return [
                     'success' => true,
-                    'data' => $result,
+                    'data' => $postgrado,
                     'status_code' => 200,
+                    // 'materias'=>$materias,
+                    // 'nivel'=>$nivel
+
                 ];
             } else {
                 return [
@@ -126,6 +134,7 @@ class PostgradoController extends Controller
     public function update(Request $request, $id)
     {
 
+        
         try {
             $validator = Validator::make($request->all(), [
                 'nombre' => 'required',

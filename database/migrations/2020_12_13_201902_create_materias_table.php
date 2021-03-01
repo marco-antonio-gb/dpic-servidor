@@ -17,7 +17,7 @@ class CreateMateriasTable extends Migration
             $table->id('idMateria');
             $table->string('nombre');
             $table->string('sigla');
-            $table->string('descripcion');
+            $table->string('descripcion')->nullable();
             $table->decimal('credito',10,2);
             
         });

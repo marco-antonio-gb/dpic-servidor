@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Validator;
 use App\Models\Docente;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Resources\UsuariosResource;
- 
+use Validator;
 
 class UsuarioController extends Controller
 {
@@ -21,22 +19,24 @@ class UsuarioController extends Controller
     {
         // comp = Component::select(DB::raw("CONCAT('name','id') AS ID"))->get()
         try {
-            $result = Usuario::select('idUsuario',DB::raw("CONCAT(paterno,' ',materno,' ',nombres) AS nombres"),'celular','email','profesion','activo','tipo_usuario')->get();
+            // DB::raw("SELECT IF((paterno AND materno) IS NULL, 'N/A', CONCAT(paterno,' ', IFNULL(materno, ''))) AS member_name FROM users  WHERE id = 1");
+            // $result = Usuario::select('idUsuario', 'paterno', 'materno', 'nombres', 'celular', 'email', 'profesion', 'activo')->get();
+            $result = Usuario::select('idUsuario',DB::raw("CONCAT(paterno,' ',materno,' ',nombres) AS full_name"),'celular','email','profesion','activo','activo')->get();
             // $result=Usuario::all();
             if (!$result->isEmpty()) {
                 return response()->json([
 
                     'data' => $result,
                     'success' => true,
-                    'total'=>count($result),
+                    'total' => count($result),
                     'message' => 'Lista de usuarios',
-                    'status_code'=>200
+                    'status_code' => 200,
                 ]);
             } else {
                 return [
                     'success' => false,
                     'message' => 'No existen resultados',
-                    'status_code'=>204
+                    'status_code' => 204,
                 ];
             }
         } catch (\Exception $ex) {
@@ -65,7 +65,7 @@ class UsuarioController extends Controller
      */
     public function store(Request $request)
     {
-        
+
         try {
             $tipo = $request['tipo_usuario'];
             $validator = Validator::make($request->all(), [
@@ -83,10 +83,10 @@ class UsuarioController extends Controller
                 return response()->json([
                     'success' => false,
                     'validator' => $validator->errors()->all(),
-                    'status_code'=>400
+                    'status_code' => 400,
                 ]);
             }
-           
+
             $user = Usuario::create(array_merge(
                 $validator->validated(),
                 ['password' => bcrypt($request->password)]
@@ -126,13 +126,13 @@ class UsuarioController extends Controller
                 return [
                     'success' => true,
                     'data' => $result,
-                    'status_code'=>200
+                    'status_code' => 200,
                 ];
             } else {
                 return [
                     'success' => false,
                     'message' => 'No se encontro ningun registro',
-                    'status_code'=>204
+                    'status_code' => 204,
                 ];
             }
         } catch (\Exception $ex) {
@@ -180,19 +180,19 @@ class UsuarioController extends Controller
                 return response()->json([
                     'success' => false,
                     'validator' => $validator->errors()->all(),
-                    'status_code'=>400
+                    'status_code' => 400,
                 ]);
-            }else{
-                $res_usuario=[
-                    'paterno'=>$request['paterno'],
-                    'materno'=>$request['materno'],
-                    'nombres'=>$request['nombres'],
-                    'ci'=>$request['ci'],
-                    'ci_ext'=>$request['ci_ext'],
-                    'celular'=>$request['celular'],
-                    'profesion'=>$request['profesion'],
-                    'email'=>$request['email'],
-                    'password' => bcrypt($request['password'])
+            } else {
+                $res_usuario = [
+                    'paterno' => $request['paterno'],
+                    'materno' => $request['materno'],
+                    'nombres' => $request['nombres'],
+                    'ci' => $request['ci'],
+                    'ci_ext' => $request['ci_ext'],
+                    'celular' => $request['celular'],
+                    'profesion' => $request['profesion'],
+                    'email' => $request['email'],
+                    'password' => bcrypt($request['password']),
                 ];
             }
             Usuario::where('idUsuario', '=', $id)->update($res_usuario);

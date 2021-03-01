@@ -7,56 +7,53 @@ use Illuminate\Http\Request;
 
 class InscripcionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+   
     public function index()
     {
-        //
+        try {
+            $result = Inscripcion::with('postgraduantes','postgrados')->get();
+            if (!$result->isEmpty()) {
+                return response()->json([
+
+                    'data' => $result,
+                    'success' => true,
+                    'total'=>count($result),
+                    'message' => 'Lista de inscripciones',
+                    'status_code'=>200
+                ]);
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'No existen resultados',
+                    'status_code'=>201
+                ];
+            }
+        } catch (\Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => $ex->getMessage(),
+            ], 404);
+        }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+     
     public function store(Request $request)
     {
         //
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Inscripcion  $inscripcion
-     * @return \Illuminate\Http\Response
-     */
+    
     public function show(Inscripcion $inscripcion)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Inscripcion  $inscripcion
-     * @return \Illuminate\Http\Response
-     */
+    
     public function update(Request $request, Inscripcion $inscripcion)
     {
         //
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Inscripcion  $inscripcion
-     * @return \Illuminate\Http\Response
-     */
+ 
     public function destroy(Inscripcion $inscripcion)
     {
         //

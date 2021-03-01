@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Postgrado;
+use App\Models\Inscripcion; 
 
 class Postgraduante extends Model
 {
@@ -33,4 +35,8 @@ class Postgraduante extends Model
     ];
 
     public $timestamps = false;
+    
+    public function inscripciones(){
+        return $this->belongsTo(Inscripcion::class,'postgrado_id');
+    }
 }

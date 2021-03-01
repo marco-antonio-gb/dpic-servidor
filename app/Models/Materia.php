@@ -2,7 +2,7 @@
 
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
-
+use App\Models\Postgrado;
 class Materia extends Model
 {
     protected $table = 'materias';
@@ -14,4 +14,7 @@ class Materia extends Model
         'credito'
     ];
     public $timestamps = false;
+    public function postgrados(){
+        return $this->belongsToMany(Postgrado::class,'materia_postgrado','materia_id','postgrado_id');
+    }
 }

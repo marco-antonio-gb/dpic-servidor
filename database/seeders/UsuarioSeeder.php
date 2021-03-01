@@ -15,18 +15,46 @@ class UsuarioSeeder extends Seeder
     public function run()
     {
         DB::table('usuarios')->insert([
-            'paterno'=>"GUTIERREZ",
-            'materno'=>"BELTRAN",
-            'nombres'=>"MARCO ANTONIO",
-            'ci'=>"5779557",
+            'nombres'=>"Rolando",
+            'paterno'=>"Paterno",
+            'materno'=>"Materno",
+            'ci'=>"123456",
             'ci_ext'=>"OR",
             'profesion'=>"INGENIERIA DE SISTEMAS",
-            'titulo_abrv'=>"Msc. Ing.",
-            'celular'=>"71856386",
-            'telefono'=>"5251857",
+            'titulo_abrv'=>"*",
+            'celular'=>"1234567",
+            'telefono'=>"7654321",
             'password'=>bcrypt('admin'),
-            'email'=>"modem.ff@gmail.com",
-
+            'email'=>"admin@admin.com",
+            'tipo_usuario_id'=>1
+        ]);
+        DB::table('usuarios')->insert([
+            'nombres'=>"Rolando",
+            'paterno'=>"Paterno",
+            'paterno'=>"Materno",
+            'ci'=>"12345678",
+            'ci_ext'=>"OR",
+            'profesion'=>"INGENIERIA INFORMATICA",
+            'titulo_abrv'=>"*",
+            'celular'=>"1234567",
+            'telefono'=>"7654321",
+            'password'=>bcrypt('admin'),
+            'email'=>"admin2@admin.com",
+            'tipo_usuario_id'=>2
+        ]);
+        DB::table('usuarios')->insert([
+            'nombres'=>"Rolando",
+            'paterno'=>"Paterno",
+            'materno'=>"Materno",
+            'ci'=>"123456789",
+            'ci_ext'=>"OR",
+            'profesion'=>"INGENIERIA INFORMATICA",
+            'titulo_abrv'=>"*",
+            'celular'=>"1234567",
+            'telefono'=>"7654321",
+            'password'=>bcrypt('admin'),
+            'email'=>"admin3@admin.com",
+            'tipo_usuario_id'=>3
         ]);
     }
 }

@@ -127,7 +127,10 @@ class AuthController extends Controller
      */
     public function userProfile()
     {
-        return response()->json(auth()->user());
+        $id = auth()->user()->idUsuario;
+        $result = Usuario::select('usuarios.nombres','usuarios.idUsuario','tipo_usuarios.nombre AS rol','tipo_usuarios.descripcion')->join('tipo_usuarios','usuarios.tipo_usuario_id','=','tipo_usuarios.idTipoUsuario')->where('idUsuario','=',$id)->get()->first();
+        // return response()->json(auth()->user());
+        return response()->json($result);
     }
 
     /**
@@ -140,10 +143,10 @@ class AuthController extends Controller
     protected function createNewToken($token)
     {
         return response()->json([
-            'success' => true,
+            // 'success' => true,
             'access_token' => $token,
-            'user'=>auth()->user()->only(['idUsuario','nombres','tipo_usuario']),
-            'status_code'=>200
+            // 'user'=>auth()->user()->only(['idUsuario','nombres','tipo_usuario']),
+            // 'status_code'=>200
         ]);
          
     }

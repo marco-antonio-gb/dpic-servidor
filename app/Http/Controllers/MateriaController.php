@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Materia;
+use App\Models\MateriaPostgrado;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -16,6 +17,10 @@ class MateriaController extends Controller
      */
     public function index()
     {
+
+
+        // $articlesConTags = Materia::with('postgrados')->get();
+        // return $articlesConTags;
         try {
             $result = Materia::all();
             if (!$result->isEmpty()) {
@@ -49,11 +54,13 @@ class MateriaController extends Controller
      */
     public function store(Request $request)
     {
+
+        // return $request;
         try {
             $validator = Validator::make($request->all(), [
-                'nombre' => 'required',
-                'sigla' => 'required',
-                'descripcion' => 'required',
+                'nombre' => 'required | unique:materias',
+                'sigla' => 'required | unique:materias',
+                // 'descripcion' => 'required',
                 'credito' => 'required',
             ]);
             if ($validator->fails()) {
@@ -63,9 +70,16 @@ class MateriaController extends Controller
                     'status_code' => 400,
                 ]);
             } else {
-                Materia::create(array_merge(
+                $lastMateria=Materia::create(array_merge(
                     $validator->validated()
-                ));
+                ))->idMateria;
+                
+            
+                $postgrado_res=[
+                    'materia_id'=>$lastMateria,
+                    'postgrado_id'=>$request['postgrado_id']
+                ];
+                MateriaPostgrado::create($postgrado_res);
                 return response()->json([
                     'success' => true,
                     'message' => 'Materia registrado correctamente',
@@ -90,6 +104,7 @@ class MateriaController extends Controller
     {
         try {
             $result = Materia::where('idMateria', '=', $id)->get()->first();
+            $result->postgrados;
             if ($result) {
                 return [
                     'success' => true,
@@ -124,7 +139,7 @@ class MateriaController extends Controller
             $validator = Validator::make($request->all(), [
                 'nombre' => 'required',
                 'sigla' => 'required',
-                'descripcion' => 'required',
+                // 'descripcion' => 'required',
                 'credito' => 'required',
             ]);
             if ($validator->fails()) {
