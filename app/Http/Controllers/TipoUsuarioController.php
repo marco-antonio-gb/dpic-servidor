@@ -14,7 +14,7 @@ class TipoUsuarioController extends Controller
      */
     public function index()
     {
-        //
+       return TipoUsuario::all();
     }
 
     /**

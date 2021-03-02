@@ -16,6 +16,8 @@ Route::group(['middleware' => ['jwt.verify']], function () {
     Route::Apiresource('postgraduantes', PostgraduanteController::class, ['except' => ['create', 'edit']]);
 /*----- USUARIOS -------*/
     Route::Apiresource('usuarios', UsuarioController::class, ['except' => ['create', 'edit']]);
+/*----- TIPO USUARIOS -------*/
+    Route::Apiresource('tipo-usuarios', TipoUsuarioController::class, ['except' => ['create', 'edit']]);
 /*----- POSTGRADOS -------*/
     Route::Apiresource('postgrados', PostgradoController::class, ['except' => ['create', 'edit']]);
 /*----- ROLES -------*/
