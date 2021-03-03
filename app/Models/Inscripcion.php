@@ -13,17 +13,16 @@ class Inscripcion extends Model
     protected $primaryKey="idInscripcion";
     protected $fillable=[
             'gestion',
-            'fecha_registro',
-            'monto',
-            'boleta',
             'postgrado_id',
             'postgraduante_id',
     ];
-    public $timestamps = false;
     public function postgraduantes(){
         return $this->belongsTo(Postgraduante::class,'postgraduante_id');
     }
     public function postgrados(){
         return $this->belongsTo(Postgrado::class,'postgrado_id');
+    }
+    public function pagos(){
+        return $this->belongsTo(Pago::class,'postgrado_id');
     }
 }

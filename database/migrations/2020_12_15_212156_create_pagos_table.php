@@ -15,13 +15,18 @@ class CreatePagosTable extends Migration
     {
         Schema::create('pagos', function (Blueprint $table) {
             $table->id('idPago');
-            $table->integer('monto');
+            $table->string('item');
+            $table->integer('costo_unitario');
             $table->string('boleta');
             $table->date('fecha_cobro');
+            $table->date('observacion')->nullable();
+            $table->unsignedBigInteger('inscripcion_id');
+            $table->foreign('inscripcion_id')->references('idInscripcion')->on('inscripciones');
             $table->unsignedBigInteger('postgrado_id');
             $table->foreign('postgrado_id')->references('idPostgrado')->on('postgrados');
             $table->unsignedBigInteger('postgraduante_id');
             $table->foreign('postgraduante_id')->references('idPostgraduante')->on('postgraduantes');
+            $table->timestamps();
         });
     }
 

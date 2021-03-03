@@ -23,6 +23,7 @@ class CreateInscripcionRequisitosTable extends Migration
             $table->foreign('postgraduante_id')->references('idPostgraduante')->on('postgraduantes');
             $table->unsignedBigInteger('requisito_id');
             $table->foreign('requisito_id')->references('idRequisito')->on('requisitos');
+            $table->timestamps();
         });
     }
 

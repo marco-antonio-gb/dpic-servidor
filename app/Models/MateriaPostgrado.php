@@ -13,5 +13,5 @@ class MateriaPostgrado extends Model
         'materia_id',
         'postgrado_id'
     ]; 
-    public $timestamps = false;
+    
 }

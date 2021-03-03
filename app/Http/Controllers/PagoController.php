@@ -55,6 +55,7 @@ class PagoController extends Controller
                 'costo_unitario' => new ValidPago,
                 'boleta' => 'required|unique:pagos',
                 'fecha_cobro' => 'required',
+                
                 'postgrado_id' => 'required',
                 'postgraduante_id' => 'required',
             ]);
@@ -65,9 +66,7 @@ class PagoController extends Controller
                     'status_code' => 400,
                 ]);
             } else {
-                Pago::create(array_merge(
-                    $validator->validated()
-                ));
+                Pago::create($request->all());
                 return response()->json([
                     'success' => true,
                     'message' => 'Pago registrado correctamente',

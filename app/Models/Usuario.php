@@ -35,7 +35,7 @@ class Usuario extends Authenticatable implements JWTSubject
 
 
     ];
-    public $timestamps = false;
+    
     /**
      * The attributes that should be hidden for arrays.
      *

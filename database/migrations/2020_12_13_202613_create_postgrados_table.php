@@ -23,6 +23,7 @@ class CreatePostgradosTable extends Migration
             $table->string('gestion');
             $table->unsignedBigInteger('nivel_id');
             $table->foreign('nivel_id')->references('idNivel')->on('niveles');
+            $table->timestamps();
         });
     }
 

@@ -18,24 +18,19 @@ class Postgraduante extends Model
         'ci',
         'ci_ext',
         'lugar_nac',
-        'fecha_nac',
-        'direc_domicilio',
-        'nro_domicilio',
+        // 'fecha_nac',
+        // 'direc_domicilio',
+        // 'nro_domicilio',
         'telf_domicilio',
         'celular',
         'correo',
         'profesion',
-        'lugar_trabajo',
-        'telf_trabajo',
-        'lugar_estudio',
+        // 'lugar_trabajo',
+        // 'telf_trabajo',
+        // 'lugar_estudio',
         'observaciones',
-        'fecha_inscripcion',
         'foto'
-
     ];
-
-    public $timestamps = false;
-    
     public function inscripciones(){
         return $this->belongsTo(Inscripcion::class,'postgrado_id');
     }

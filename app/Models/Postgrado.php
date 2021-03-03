@@ -21,7 +21,7 @@ class Postgrado extends Model
         'nivel_id'
     ];
 
-    public $timestamps = false;
+     
     public function materias(){
         return $this->belongsToMany(Materia::class,'materia_postgrado','postgrado_id','materia_id');
     }
