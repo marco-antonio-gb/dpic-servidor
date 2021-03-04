@@ -19,7 +19,7 @@ class CreatePagosTable extends Migration
             $table->integer('costo_unitario');
             $table->string('boleta');
             $table->date('fecha_cobro');
-            $table->date('observacion')->nullable();
+            $table->string('observacion')->nullable();
             $table->unsignedBigInteger('inscripcion_id');
             $table->foreign('inscripcion_id')->references('idInscripcion')->on('inscripciones');
             $table->unsignedBigInteger('postgrado_id');

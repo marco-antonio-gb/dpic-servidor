@@ -1,11 +1,12 @@
 <?php
 namespace App\Http\Controllers;
-use App\Models\Inscripcion;
-use App\Models\Postgraduante;
-use App\Models\Postgrado;
-use App\Models\Pago;
-use Illuminate\Http\Request;
 use Validator;
+use App\Models\Pago;
+use App\Models\Postgrado;
+use App\Models\Inscripcion;
+use Illuminate\Http\Request;
+use App\Models\Postgraduante;
+use Illuminate\Support\Facades\DB;
 class InscripcionController extends Controller
 {
     public function index()
@@ -15,18 +16,17 @@ class InscripcionController extends Controller
             // $inscripcion_result = Inscripcion::with('postgraduantes', 'postgrados','pagos')->get();
             $inscripcion_result = Inscripcion::all();
             foreach ($inscripcion_result as $key => $value) {
-                $postgrado = Postgrado::where('idPostgrado','=',$value['postgrado_id'])->get()->first();
-                $postgraduante = Postgraduante::where('idPostgraduante','=',$value['postgraduante_id'])->get()->first();
-                $res_pagos=Pago::where('inscripcion_id','=',$value['idInscripcion'])->get();
-
-                $inscripciones[] = (object) array(
-                    'Inscripcion' => $value,
-                    'Postgrado' => $postgrado,
-                    'Postgraduante' => $postgraduante,
-                    'Pagos' => $res_pagos,
-                );
+                // $postgrado = Postgrado::select('idPostgrado','nombre')->where('idPostgrado','=',$value['postgrado_id'])->get()->first();
+                // $postgraduante = Postgraduante::select('idPostgraduante',DB::raw("CONCAT(paterno,' ',materno,' ',nombres) AS full_name"),'ci','ci_ext')->where('idPostgraduante','=',$value['postgraduante_id'])->get()->first();
+                // $res_pagos=Pago::where('inscripcion_id','=',$value['idInscripcion'])->get();
+                $resultado=Inscripcion::select('inscripciones.idInscripcion','inscripciones.gestion','postgrados.idPostgrado','postgrados.nombre','postgraduantes.idPostgraduante',DB::raw("CONCAT(postgraduantes.paterno,' ',postgraduantes.materno,' ',postgraduantes.nombres) AS full_name"),'postgraduantes.ci','postgraduantes.ci_ext')->join('postgrados','postgrados.idPostgrado','=','inscripciones.postgrado_id')->join('postgraduantes','postgraduantes.idPostgraduante','=','inscripciones.postgraduante_id')->where('inscripciones.postgrado_id','=',$value['postgrado_id'])->where('inscripciones.postgraduante_id','=',$value['postgraduante_id'])->get()->first();
+                $inscripciones[] =    
+                    $resultado;
+                    // 'Inscripcion' => $value,
+                    // 'Postgrado' => $postgrado,
+                    // 'Postgraduante' => $postgraduante,
+                    // 'Pagos' => $res_pagos,
             }
-            
             if (!$inscripcion_result->isEmpty()) {
                 return response()->json([
                     'data' => $inscripciones,

@@ -1,10 +1,11 @@
 <?php
-
 namespace App\Http\Controllers;
-
+use Validator;
+use App\Models\Materia;
 use App\Models\Postgrado;
 use Illuminate\Http\Request;
-use Validator;
+use App\Models\MateriaPostgrado;
+use Illuminate\Support\Facades\DB;
 
 class PostgradoController extends Controller
 {
@@ -21,7 +22,6 @@ class PostgradoController extends Controller
             $result = Postgrado::all();
             if (!$result->isEmpty()) {
                 return response()->json([
-
                     'data' => $result,
                     'success' => true,
                     'total' => count($result),
@@ -42,7 +42,6 @@ class PostgradoController extends Controller
             ], 404);
         }
     }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -51,8 +50,8 @@ class PostgradoController extends Controller
      */
     public function store(Request $request)
     {
-
         try {
+            DB::beginTransaction();
             $validator = Validator::make($request->all(), [
                 'nombre' => 'required|unique:postgrados',
                 'fecha_inicio' => 'required',
@@ -69,23 +68,48 @@ class PostgradoController extends Controller
                     'status_code' => 400,
                 ]);
             }
-            Postgrado::create(array_merge(
+            $lastIdPostgrado = Postgrado::create(array_merge(
                 $validator->validated()
-            ));
+            ))->idPostgrado;
+            $materias=$request['materias'];
+            foreach ($materias as $key => $value) {
+                $lastIdMateria=Materia::create($value)->idMateria;
+                MateriaPostgrado::create([
+                    'materia_id'=>$lastIdMateria,
+                    'postgrado_id'=>$lastIdPostgrado
+                ]);
+                DB::commit();
+            }
             return response()->json([
                 'success' => true,
                 'message' => 'Postgrado registrado correctamente',
                 'status_code' => 201,
             ], 201);
-
-        } catch (\Exception $ex) {
-            return response()->json([
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+             return response()->json([
                 'success' => false,
-                'message' => $ex->getMessage(),
+                'funcion' => 'Postgrado Controller Store',
+                'message' => $e->getMessage(),
+            ], 404);
+        } catch (\Throwable $e) {
+            DB::rollback();
+             return response()->json([
+                'success' => false,
+                'funcion' => 'Postgrado Controller Store',
+                'message' => $e->getMessage(),
             ], 404);
         }
+        // try {
+            
+        // } catch (\Exception $ex) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => $ex->getMessage(),
+        //     ], 404);
+        // }
     }
-
     /**
      * Display the specified resource.
      *
@@ -97,7 +121,6 @@ class PostgradoController extends Controller
         try {
             // $result = Postgrado::select('postgrados.idPostgrado','postgrados.nombre','postgrados.fecha_inicio','postgrados.cantidad_pagos','postgrados.precio','postgrados.gestion','niveles.nombre AS nivel','niveles.idNivel')->join('niveles','niveles.idNivel','=','postgrados.nivel_id')->where('idPostgrado', '=', $id)->get()->first();
             $postgrado = Postgrado::find($id);
-
             if ($postgrado) {
                 $postgrado->materias;
                 $postgrado->niveles;
@@ -107,7 +130,6 @@ class PostgradoController extends Controller
                     'status_code' => 200,
                     // 'materias'=>$materias,
                     // 'nivel'=>$nivel
-
                 ];
             } else {
                 return [
@@ -123,7 +145,6 @@ class PostgradoController extends Controller
             ], 404);
         }
     }
-
     /**
      * Update the specified resource in storage.
      *
@@ -133,8 +154,6 @@ class PostgradoController extends Controller
      */
     public function update(Request $request, $id)
     {
-
-        
         try {
             $validator = Validator::make($request->all(), [
                 'nombre' => 'required',
@@ -160,7 +179,6 @@ class PostgradoController extends Controller
                     'precio' => $request['precio'],
                     'gestion' => $request['gestion'],
                     'nivel_id' => $request['nivel_id'],
-
                 ];
                 Postgrado::where('idPostgrado', '=', $id)->update($res_postgrado);
                 return response()->json([
@@ -168,7 +186,6 @@ class PostgradoController extends Controller
                     'message' => 'Postgrado Actualizado correctamente',
                 ], 201);
             }
-
         } catch (\Exception $ex) {
             return response()->json([
                 'success' => false,
@@ -176,7 +193,6 @@ class PostgradoController extends Controller
             ], 404);
         }
     }
-
     /**
      * Remove the specified resource from storage.
      *
@@ -186,7 +202,6 @@ class PostgradoController extends Controller
     public function destroy($id)
     {
         try {
-
             Postgrado::where('idPostgrado', '=', $id)->delete();
             return response()->json([
                 'success' => true,

@@ -19,7 +19,7 @@ class CreateMateriaPostgradoTable extends Migration
             $table->foreign('materia_id')->references('idMateria')->on('materias');
             $table->unsignedBigInteger('postgrado_id');
             $table->foreign('postgrado_id')->references('idPostgrado')->on('postgrados');
-            
+            $table->timestamps();
         });
     }
 

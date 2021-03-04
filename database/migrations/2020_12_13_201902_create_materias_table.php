@@ -16,10 +16,9 @@ class CreateMateriasTable extends Migration
         Schema::create('materias', function (Blueprint $table) {
             $table->id('idMateria');
             $table->string('nombre');
-            $table->string('sigla');
-            $table->string('descripcion')->nullable();
+            $table->string('sigla')->unique();
             $table->decimal('credito',10,2);
-            
+            $table->timestamps();
         });
     }
 
