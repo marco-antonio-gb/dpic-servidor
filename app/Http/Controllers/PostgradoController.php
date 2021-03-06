@@ -1,8 +1,12 @@
 <?php
 namespace App\Http\Controllers;
+
 use Validator;
 use App\Models\Materia;
+// use Barryvdh\DomPDF\PDF;
+use PDF;
 use App\Models\Postgrado;
+use App\Models\Inscripcion;
 use Illuminate\Http\Request;
 use App\Models\MateriaPostgrado;
 use Illuminate\Support\Facades\DB;
@@ -71,12 +75,12 @@ class PostgradoController extends Controller
             $lastIdPostgrado = Postgrado::create(array_merge(
                 $validator->validated()
             ))->idPostgrado;
-            $materias=$request['materias'];
+            $materias = $request['materias'];
             foreach ($materias as $key => $value) {
-                $lastIdMateria=Materia::create($value)->idMateria;
+                $lastIdMateria = Materia::create($value)->idMateria;
                 MateriaPostgrado::create([
-                    'materia_id'=>$lastIdMateria,
-                    'postgrado_id'=>$lastIdPostgrado
+                    'materia_id' => $lastIdMateria,
+                    'postgrado_id' => $lastIdPostgrado,
                 ]);
                 DB::commit();
             }
@@ -85,24 +89,24 @@ class PostgradoController extends Controller
                 'message' => 'Postgrado registrado correctamente',
                 'status_code' => 201,
             ], 201);
-            
+
         } catch (\Exception $e) {
             DB::rollback();
-             return response()->json([
+            return response()->json([
                 'success' => false,
                 'funcion' => 'Postgrado Controller Store',
                 'message' => $e->getMessage(),
             ], 404);
         } catch (\Throwable $e) {
             DB::rollback();
-             return response()->json([
+            return response()->json([
                 'success' => false,
                 'funcion' => 'Postgrado Controller Store',
                 'message' => $e->getMessage(),
             ], 404);
         }
         // try {
-            
+
         // } catch (\Exception $ex) {
         //     return response()->json([
         //         'success' => false,
@@ -211,6 +215,82 @@ class PostgradoController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $ex->getMessage(),
+            ], 404);
+        }
+    }
+    // CUSTOM FUNCTIONS ****************************************************************
+    public function postgrado_postgraduantes($idPostgrado)
+    {
+        $resultado = Inscripcion::select('postgraduantes.idPostgraduante', DB::raw("CONCAT(postgraduantes.paterno,' ',postgraduantes.materno,' ',postgraduantes.nombres) AS full_name"), DB::raw("CONCAT(postgraduantes.ci,'-',postgraduantes.ci_ext) AS cedula "), 'postgraduantes.celular', 'postgraduantes.profesion')->where('postgrado_id', '=', $idPostgrado)->join('postgraduantes', 'postgraduantes.idPostgraduante', '=', 'inscripciones.postgraduante_id')->get();
+        return $resultado;
+    }
+
+    public function calificacionesAsignatura()
+    {
+        try {
+            $result=Postgrado::all();
+            // return  view('reporte_calificaciones_general', ['postgrados'=>$result]);
+            $pdf = PDF::loadView('reporte_calificaciones_asignatura', array('postgrados' => $result));
+            return $pdf->stream('calificaciones_asignatura.pdf');
+
+        } catch (Exception $ex) {
+            return response()->json([
+                'message' => $ex->getMessage(),
+                'exception' => (string) $ex,
+                'line' => $ex->getLine(),
+                'file' => $ex->getFile(),
+            ], 404);
+        }
+    }
+    public function calificacionesPersonal()
+    {
+        try {
+            $result=Postgrado::all();
+            // return  view('reporte_calificaciones_general', ['postgrados'=>$result]);
+            $pdf = PDF::loadView('reporte_calificaciones_personal', array('postgrados' => $result));
+            return $pdf->stream('calificaciones_personal.pdf');
+
+        } catch (Exception $ex) {
+            return response()->json([
+                'message' => $ex->getMessage(),
+                'exception' => (string) $ex,
+                'line' => $ex->getLine(),
+                'file' => $ex->getFile(),
+            ], 404);
+        }
+    }
+    public function pagosGeneral()
+    {
+        try {
+            $result=Postgrado::all();
+            // return  view('reporte_calificaciones_general', ['postgrados'=>$result]);
+            $pdf = PDF::loadView('reporte_pagos_general', array('postgrados' => $result));
+            $pdf->setPaper('legal', 'landscape');
+            return $pdf->stream('pagos_postgrados.pdf');
+
+        } catch (Exception $ex) {
+            return response()->json([
+                'message' => $ex->getMessage(),
+                'exception' => (string) $ex,
+                'line' => $ex->getLine(),
+                'file' => $ex->getFile(),
+            ], 404);
+        }
+    }
+    public function pagosPersonal()
+    {
+        try {
+            $result=Postgrado::all();
+            // return  view('reporte_calificaciones_general', ['postgrados'=>$result]);
+            $pdf = PDF::loadView('reporte_pagos_personal', array('postgrados' => $result));
+            return $pdf->stream('pagos_postgraduante.pdf');
+
+        } catch (Exception $ex) {
+            return response()->json([
+                'message' => $ex->getMessage(),
+                'exception' => (string) $ex,
+                'line' => $ex->getLine(),
+                'file' => $ex->getFile(),
             ], 404);
         }
     }

@@ -17,7 +17,7 @@ class CreateMateriasTable extends Migration
             $table->id('idMateria');
             $table->string('nombre');
             $table->string('sigla')->unique();
-            $table->decimal('credito',10,2);
+            $table->decimal('credito',10,1);
             $table->timestamps();
         });
     }

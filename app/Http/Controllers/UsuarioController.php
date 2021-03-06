@@ -1,10 +1,12 @@
 <?php
 namespace App\Http\Controllers;
+
 use App\Models\Docente;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Validator;
+
 class UsuarioController extends Controller
 {
     /**
@@ -18,7 +20,7 @@ class UsuarioController extends Controller
         try {
             // DB::raw("SELECT IF((paterno AND materno) IS NULL, 'N/A', CONCAT(paterno,' ', IFNULL(materno, ''))) AS member_name FROM users  WHERE id = 1");
             // $result = Usuario::select('idUsuario', 'paterno', 'materno', 'nombres', 'celular', 'email', 'profesion', 'activo')->get();
-            $result = Usuario::select('idUsuario', DB::raw("CONCAT(paterno,' ',materno,' ',nombres) AS full_name"), 'celular', 'email', 'profesion', 'activo', 'activo')->where('tipo_usuario_id','!=',2)->get();
+            $result = Usuario::select('idUsuario', DB::raw("CONCAT(paterno,' ',materno,' ',nombres) AS full_name"), 'celular', 'email', 'profesion', 'activo', 'activo')->where('tipo_usuario_id', '!=', 2)->get();
             // $result=Usuario::all();
             if (!$result->isEmpty()) {
                 return response()->json([
@@ -42,47 +44,7 @@ class UsuarioController extends Controller
             ], 404);
         }
     }
-    public function indexDocentes()
-    {
-        try {
-            $result = Usuario::select('idUsuario', DB::raw("CONCAT(paterno,' ',materno,' ',nombres) AS full_name"), 'celular', 'email', 'profesion', 'activo', 'activo')->where('tipo_usuario_id','=',2)->get();
-            if (!$result->isEmpty()) {
-                return response()->json([
-                    'data' => $result,
-                    'success' => true,
-                    'total' => count($result),
-                    'message' => 'Lista de usuarios',
-                    'status_code' => 200,
-                ]);
-            } else {
-                return [
-                    'success' => false,
-                    'message' => 'No existen resultados',
-                    'status_code' => 204,
-                ];
-            }
-        } catch (\Exception $ex) {
-            return response()->json([
-                'success' => false,
-                'message' => $ex->getMessage(),
-            ], 404);
-        }
-    }
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+
     public function store(Request $request)
     {
         // return $request;
@@ -129,12 +91,7 @@ class UsuarioController extends Controller
             ], 404);
         }
     }
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+
     public function show($id)
     {
         try {
@@ -159,23 +116,7 @@ class UsuarioController extends Controller
             ], 404);
         }
     }
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+
     public function update(Request $request, $id)
     {
         try {
@@ -206,7 +147,6 @@ class UsuarioController extends Controller
                     'celular' => $request['celular'],
                     'profesion' => $request['profesion'],
                     'email' => $request['email'],
-                    'password' => bcrypt($request['password']),
                 ];
             }
             Usuario::where('idUsuario', '=', $id)->update($res_usuario);
@@ -228,12 +168,7 @@ class UsuarioController extends Controller
             ], 404);
         }
     }
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+
     public function destroy($id)
     {
         try {
@@ -242,6 +177,33 @@ class UsuarioController extends Controller
                 'success' => true,
                 'message' => 'Usuario eliminado correctamente',
             ], 201);
+        } catch (\Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => $ex->getMessage(),
+            ], 404);
+        }
+    }
+    // *******************************************************************
+    public function indexDocentes()
+    {
+        try {
+            $result = Usuario::select('idUsuario', DB::raw("CONCAT(titulo_abrv,' ',paterno,' ',materno,' ',nombres) AS full_name"), 'celular', 'email', 'profesion', 'activo', 'activo')->where('tipo_usuario_id', '=', 2)->get();
+            if (!$result->isEmpty()) {
+                return response()->json([
+                    'data' => $result,
+                    'success' => true,
+                    'total' => count($result),
+                    'message' => 'Lista de usuarios',
+                    'status_code' => 200,
+                ]);
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'No existen resultados',
+                    'status_code' => 204,
+                ];
+            }
         } catch (\Exception $ex) {
             return response()->json([
                 'success' => false,
