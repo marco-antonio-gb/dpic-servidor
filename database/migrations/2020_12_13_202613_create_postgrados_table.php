@@ -17,7 +17,6 @@ class CreatePostgradosTable extends Migration
             $table->id('idPostgrado');
             $table->string('nombre');
             $table->date('fecha_inicio');
-            $table->date('fecha_final');
             $table->integer('cantidad_pagos');
             $table->integer('precio');
             $table->string('gestion');

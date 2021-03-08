@@ -30,20 +30,14 @@ $cargo="DIRECTOR DPIC";
             $x = ($pdf->get_width() - $width) - 20;
             $y = $pdf->get_height() - 40;
             $pdf->page_text($x, $y, $text, $font, $size);
-
             $text2 ="Fecha y Hora:".' '. date('d/m/Y h:i:s a');
             $width = $fontMetrics->get_text_width($text2, $font, $size) / 2;
             $x2 = ($pdf->get_width() - $width) - ($pdf->get_width()-115);
             $y2 = $pdf->get_height() - 40;
             $pdf->page_text($x2, $y2, $text2, $font, $size);
-
             $x3 = ($pdf->get_width() - $width) /2;
-            
-
             $text3 = "http://dpic.fni.edu.bo/";
             $pdf->page_text($x3, $y, $text3, $font, $size);
-
-
         }
     </script>
     <div >
@@ -81,11 +75,11 @@ $cargo="DIRECTOR DPIC";
         <table>
             <thead>
               <tr class="text-center ">
-                <th>NRO</th>
+                <th width="15">NRO</th>
                 <th>NOMBRES ASIGNATURA</th>
-                <th>NOTA FINAL</th>
-                <th>CALIFICACION LITERAL</th>
-                <th>OBSERVACION</th>
+                <th width="50">NOTA FINAL</th>
+                <th width="120">CALIFICACION LITERAL</th>
+                <th width="35">OBSERVACION</th>
               </tr>
             </thead>
             <tbody>
@@ -103,7 +97,6 @@ $cargo="DIRECTOR DPIC";
                 <td class="text-center ">SESENTA Y CINCO</td>
                 <td class="text-center ">REPROBADO</td>
               </tr>
-               
               <tr>
                 <td class="text-center ">3</td>
                 <td>FUNDAMENTOS DE ORGANIZACIÓN Y MÉTODOS</td>
@@ -118,7 +111,6 @@ $cargo="DIRECTOR DPIC";
                 <td class="text-center ">SESENTA Y CINCO</td>
                 <td class="text-center ">REPROBADO</td>
               </tr>
-              
               <tr>
                 <td class="text-center ">5</td>
                 <td>SISTEMAS DE CALIDAD Y PRODUCCIÓN ESBELTA</td>
@@ -154,11 +146,8 @@ $cargo="DIRECTOR DPIC";
                 <td class="text-center ">SESENTA Y CINCO</td>
                 <td class="text-center ">REPROBADO</td>
               </tr>
-               
-
             </tbody>
             </table>
-
             <div class="text-center mt-8"> 
               <hr class="new3">
             <strong>{{$firma_docente}}  <br> {{$cargo}}</strong>

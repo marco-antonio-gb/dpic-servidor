@@ -81,8 +81,8 @@ $cargo="DIRECTOR DPIC";
         <table>
             <thead>
               <tr class="text-center ">
-                <th>NRO</th>
-                <th>IMPORTE</th>
+                <th width="15">NRO</th>
+                <th>ITEM</th>
                 <th>MONTO [Bs.]</th>
                 <th>Nro. BOLETA</th>
                 <th>FECHA DE PAGO</th>

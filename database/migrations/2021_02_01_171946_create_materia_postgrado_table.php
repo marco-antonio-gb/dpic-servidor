@@ -1,9 +1,7 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-
 class CreateMateriaPostgradoTable extends Migration
 {
     /**
@@ -16,13 +14,12 @@ class CreateMateriaPostgradoTable extends Migration
         Schema::create('materia_postgrado', function (Blueprint $table) {
             $table->id('idMateriaPostgrado');
             $table->unsignedBigInteger('materia_id');
-            $table->foreign('materia_id')->references('idMateria')->on('materias');
+            $table->foreign('materia_id')->references('idMateria')->on('materias')->onDelete('cascade');
             $table->unsignedBigInteger('postgrado_id');
-            $table->foreign('postgrado_id')->references('idPostgrado')->on('postgrados');
+            $table->foreign('postgrado_id')->references('idPostgrado')->on('postgrados')->onDelete('cascade');
             $table->timestamps();
         });
     }
-
     /**
      * Reverse the migrations.
      *

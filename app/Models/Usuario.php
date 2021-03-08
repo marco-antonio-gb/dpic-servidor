@@ -25,7 +25,7 @@ class Usuario extends Authenticatable implements JWTSubject
         'ci',
         'ci_ext',
         'profesion',
-        'titulo_abrv',
+     
         'celular',
         'activo',
         'tipo_usuario_id',

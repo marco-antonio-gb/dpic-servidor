@@ -77,11 +77,11 @@ $cargo="DIRECTOR DPIC";
         <table>
             <thead>
               <tr class="text-center ">
-                <th>NRO</th>
-                <th>NOMBRES Y APELLIDOS</th>
-                <th>CALIF. FINAL</th>
-                <th>CALIFICACION LITERAL</th>
-                <th>OBSERVACION</th>
+                <th width="15">NRO</th>
+                <th>NOMBRES ASIGNATURA</th>
+                <th width="50">NOTA FINAL</th>
+                <th width="120">CALIFICACION LITERAL</th>
+                <th width="35">OBSERVACION</th>
               </tr>
             </thead>
             <tbody>
@@ -94,7 +94,7 @@ $cargo="DIRECTOR DPIC";
               </tr>
               <tr>
                 <td class="text-center ">1</td>
-                <td>GUTIERREZ BELTRAN MARCO ANTONIO</td>
+                <td>GARCIA COCA ANA MARIANELA</td>
                 <td class="text-center ">65</td>
                 <td class="text-center ">SESENTA Y CINCO</td>
                 <td class="text-center ">REPROBADO</td>
@@ -102,14 +102,14 @@ $cargo="DIRECTOR DPIC";
                
               <tr>
                 <td class="text-center ">1</td>
-                <td>GUTIERREZ BELTRAN MARCO ANTONIO</td>
+                <td>ROCIO JIMENA VILLCA QUISPE</td>
                 <td class="text-center ">65</td>
                 <td class="text-center ">SESENTA Y CINCO</td>
                 <td class="text-center ">REPROBADO</td>
               </tr>
               <tr>
                 <td class="text-center ">1</td>
-                <td>GUTIERREZ BELTRAN MARCO ANTONIO</td>
+                <td>EBELEIZ NILDA FUENTES CLAROS</td>
                 <td class="text-center ">65</td>
                 <td class="text-center ">SESENTA Y CINCO</td>
                 <td class="text-center ">REPROBADO</td>
@@ -117,95 +117,26 @@ $cargo="DIRECTOR DPIC";
               
               <tr>
                 <td class="text-center ">1</td>
-                <td>GUTIERREZ BELTRAN MARCO ANTONIO</td>
+                <td>ANDREA LOBO SILVESTRE</td>
                 <td class="text-center ">65</td>
                 <td class="text-center ">SESENTA Y CINCO</td>
                 <td class="text-center ">REPROBADO</td>
               </tr>
               <tr>
                 <td class="text-center ">1</td>
-                <td>GUTIERREZ BELTRAN MARCO ANTONIO</td>
+                <td>PAMELA LEON MAMANI</td>
                 <td class="text-center ">65</td>
                 <td class="text-center ">SESENTA Y CINCO</td>
                 <td class="text-center ">REPROBADO</td>
               </tr>
               <tr>
                 <td class="text-center ">1</td>
-                <td>GUTIERREZ BELTRAN MARCO ANTONIO</td>
+                <td>INES ANGELICA MENDES BRUM</td>
                 <td class="text-center ">65</td>
                 <td class="text-center ">SESENTA Y CINCO</td>
                 <td class="text-center ">REPROBADO</td>
               </tr>
-              <tr>
-                <td class="text-center ">1</td>
-                <td>GUTIERREZ BELTRAN MARCO ANTONIO</td>
-                <td class="text-center ">65</td>
-                <td class="text-center ">SESENTA Y CINCO</td>
-                <td class="text-center ">REPROBADO</td>
-              </tr>
-              <tr>
-                <td class="text-center ">1</td>
-                <td>GUTIERREZ BELTRAN MARCO ANTONIO</td>
-                <td class="text-center ">65</td>
-                <td class="text-center ">SESENTA Y CINCO</td>
-                <td class="text-center ">REPROBADO</td>
-              </tr>
-              <tr>
-                <td class="text-center ">1</td>
-                <td>GUTIERREZ BELTRAN MARCO ANTONIO</td>
-                <td class="text-center ">65</td>
-                <td class="text-center ">SESENTA Y CINCO</td>
-                <td class="text-center ">REPROBADO</td>
-              </tr>
-              <tr>
-                <td class="text-center ">1</td>
-                <td>GUTIERREZ BELTRAN MARCO ANTONIO</td>
-                <td class="text-center ">65</td>
-                <td class="text-center ">SESENTA Y CINCO</td>
-                <td class="text-center ">REPROBADO</td>
-              </tr>
-              <tr>
-                <td class="text-center ">1</td>
-                <td>GUTIERREZ BELTRAN MARCO ANTONIO</td>
-                <td class="text-center ">65</td>
-                <td class="text-center ">SESENTA Y CINCO</td>
-                <td class="text-center ">REPROBADO</td>
-              </tr>
-              <tr>
-                <td class="text-center ">1</td>
-                <td>GUTIERREZ BELTRAN MARCO ANTONIO</td>
-                <td class="text-center ">65</td>
-                <td class="text-center ">SESENTA Y CINCO</td>
-                <td class="text-center ">REPROBADO</td>
-              </tr>
-              <tr>
-                <td class="text-center ">1</td>
-                <td>GUTIERREZ BELTRAN MARCO ANTONIO</td>
-                <td class="text-center ">65</td>
-                <td class="text-center ">SESENTA Y CINCO</td>
-                <td class="text-center ">REPROBADO</td>
-              </tr>
-              <tr>
-                <td class="text-center ">1</td>
-                <td>GUTIERREZ BELTRAN MARCO ANTONIO</td>
-                <td class="text-center ">65</td>
-                <td class="text-center ">SESENTA Y CINCO</td>
-                <td class="text-center ">REPROBADO</td>
-              </tr>
-              <tr>
-                <td class="text-center ">1</td>
-                <td>GUTIERREZ BELTRAN MARCO ANTONIO</td>
-                <td class="text-center ">65</td>
-                <td class="text-center ">SESENTA Y CINCO</td>
-                <td class="text-center ">REPROBADO</td>
-              </tr>
-              <tr>
-                <td class="text-center ">1</td>
-                <td>GUTIERREZ BELTRAN MARCO ANTONIO</td>
-                <td class="text-center ">65</td>
-                <td class="text-center ">SESENTA Y CINCO</td>
-                <td class="text-center ">REPROBADO</td>
-              </tr>
+               
 
             </tbody>
             </table>

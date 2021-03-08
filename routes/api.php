@@ -24,6 +24,8 @@ Route::group(['middleware' => ['jwt.verify']], function () {
     Route::Apiresource('postgrados', PostgradoController::class, ['except' => ['create', 'edit']]);
 /*----- POSTGRADOS-POSTGRADUANTES -------*/
     Route::get('/postgrados-postgraduantes/{idPostgrado}', 'PostgradoController@postgrado_postgraduantes');
+/*----- POSTGRADOS-DOCENTES -------*/
+    Route::get('/postgrados-docentes/{idPostgrado}', 'PostgradoController@postgrado_docentes');
 /*----- ROLES -------*/
     Route::Apiresource('roles', RolController::class, ['except' => ['create', 'edit']]);
 /*----- PERMISOS -------*/

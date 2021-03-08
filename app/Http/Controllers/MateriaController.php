@@ -1,12 +1,10 @@
 <?php
-
 namespace App\Http\Controllers;
-
-use App\Models\Materia;
-use App\Models\MateriaPostgrado;
-use Illuminate\Http\Request;
 use Validator;
-
+use App\Models\Materia;
+use Illuminate\Http\Request;
+use App\Models\DocenteMateria;
+use App\Models\MateriaPostgrado;
 
 class MateriaController extends Controller
 {
@@ -17,8 +15,6 @@ class MateriaController extends Controller
      */
     public function index()
     {
-
-
         // $articlesConTags = Materia::with('postgrados')->get();
         // return $articlesConTags;
         try {
@@ -45,23 +41,15 @@ class MateriaController extends Controller
             ], 404);
         }
     }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+ 
     public function store(Request $request)
     {
-
-        // return $request;
+         
         try {
             $validator = Validator::make($request->all(), [
-                'nombre' => 'required | unique:materias',
-                'sigla' => 'required | unique:materias',
-                // 'descripcion' => 'required',
-                'credito' => 'required',
+                'materias.*.nombre' => 'required | unique:materias',
+                'materias.*.sigla' => 'required | unique:materias',
+                'materias.*.credito' => 'required',
             ]);
             if ($validator->fails()) {
                 return response()->json([
@@ -70,16 +58,22 @@ class MateriaController extends Controller
                     'status_code' => 400,
                 ]);
             } else {
-                $lastMateria=Materia::create(array_merge(
-                    $validator->validated()
-                ))->idMateria;
-                
-            
-                $postgrado_res=[
-                    'materia_id'=>$lastMateria,
-                    'postgrado_id'=>$request['postgrado_id']
-                ];
-                MateriaPostgrado::create($postgrado_res);
+                // Materia::create($request->all());
+                $idPostgrado = $request['postgrado_id'];
+                $materias = $request['materias'];
+                foreach ($materias as $key => $value) {
+                    $lastIdMateria = Materia::create($value)->idMateria;
+                    MateriaPostgrado::create([
+                        'materia_id' => $lastIdMateria,
+                        'postgrado_id' => $idPostgrado,
+                    ]);
+                    DocenteMateria::create([
+                        'materia_id' => $lastIdMateria,
+                        'docente_id'=>$value['docente_id'],
+                        'postgrado_id' => $idPostgrado,
+                        
+                    ]);
+                }
                 return response()->json([
                     'success' => true,
                     'message' => 'Materia registrado correctamente',
@@ -93,22 +87,18 @@ class MateriaController extends Controller
             ], 404);
         }
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Materia  $materia
-     * @return \Illuminate\Http\Response
-     */
+ 
     public function show($id)
     {
         try {
-            $result = Materia::where('idMateria', '=', $id)->get()->first();
-            $result->postgrados;
-            if ($result) {
+            $materia = Materia::where('idMateria', '=', $id)->get()->first();
+            // $postgrado = MateriaPostgrado::join('postgrados','materia_postgrado.postgrado_id','=','postgrados.idPostgrado')->where('materia_postgrado.materia_id','=',$id)->get();
+            
+            
+            if ($materia ) {
                 return [
                     'success' => true,
-                    'data' => $result,
+                    'data'=>$materia,
                     'status_code' => 200,
                 ];
             } else {
@@ -125,7 +115,6 @@ class MateriaController extends Controller
             ], 404);
         }
     }
-
     /**
      * Update the specified resource in storage.
      *
@@ -133,7 +122,7 @@ class MateriaController extends Controller
      * @param  \App\Models\Materia  $materia
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request,$id)
+    public function update(Request $request, $id)
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -152,10 +141,10 @@ class MateriaController extends Controller
                 $res_materia = [
                     'nombre' => $request['nombre'],
                     'sigla' => $request['sigla'],
-                    'descripcion' => $request['descripcion'],
                     'credito' => $request['credito'],
                 ];
                 Materia::where('idMateria', '=', $id)->update($res_materia);
+                // MateriaPostgrado::create()
                 return response()->json([
                     'success' => true,
                     'message' => 'Materia actualizada correctamente',
@@ -168,14 +157,13 @@ class MateriaController extends Controller
             ], 404);
         }
     }
-
     /**
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Materia  $materia
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Materia $materia)
+    public function destroy($id)
     {
         try {
             Materia::where('idMateria', '=', $id)->delete();

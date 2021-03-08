@@ -16,12 +16,9 @@ class UsuarioController extends Controller
      */
     public function index()
     {
-        // comp = Component::select(DB::raw("CONCAT('name','id') AS ID"))->get()
         try {
-            // DB::raw("SELECT IF((paterno AND materno) IS NULL, 'N/A', CONCAT(paterno,' ', IFNULL(materno, ''))) AS member_name FROM users  WHERE id = 1");
-            // $result = Usuario::select('idUsuario', 'paterno', 'materno', 'nombres', 'celular', 'email', 'profesion', 'activo')->get();
-            $result = Usuario::select('idUsuario', DB::raw("CONCAT(paterno,' ',materno,' ',nombres) AS full_name"), 'celular', 'email', 'profesion', 'activo', 'activo')->where('tipo_usuario_id', '!=', 2)->get();
-            // $result=Usuario::all();
+            
+            $result = Usuario::select('idUsuario', DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"), 'celular', 'email', 'profesion', 'activo', 'activo')->where('tipo_usuario_id', '!=', 2)->get();
             if (!$result->isEmpty()) {
                 return response()->json([
                     'data' => $result,
@@ -58,7 +55,6 @@ class UsuarioController extends Controller
                 'ci_ext' => 'required|string|max:5',
                 'celular' => 'required|string|max:9',
                 'profesion' => 'required|string|max:30',
-                'titulo_abrv' => 'required|string|max:30',
                 'tipo_usuario_id' => 'required|max:30',
                 'email' => 'required|string|email|max:100|unique:usuarios',
             ]);
@@ -122,8 +118,6 @@ class UsuarioController extends Controller
         try {
             $tipo = $request['tipo_usuario'];
             $validator = Validator::make($request->all(), [
-                'paterno' => 'required|string|between:2,100',
-                'materno' => 'required|string|between:2,100',
                 'nombres' => 'required|string|between:2,100',
                 'ci' => 'required|string|max:10',
                 'ci_ext' => 'required|string|max:5',
@@ -188,7 +182,7 @@ class UsuarioController extends Controller
     public function indexDocentes()
     {
         try {
-            $result = Usuario::select('idUsuario', DB::raw("CONCAT(titulo_abrv,' ',paterno,' ',materno,' ',nombres) AS full_name"), 'celular', 'email', 'profesion', 'activo', 'activo')->where('tipo_usuario_id', '=', 2)->get();
+            $result = Usuario::select('idUsuario', DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',nombres) AS full_name"), 'celular', 'email', 'profesion', 'activo', 'activo')->where('tipo_usuario_id', '=', 2)->get();
             if (!$result->isEmpty()) {
                 return response()->json([
                     'data' => $result,

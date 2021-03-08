@@ -20,8 +20,6 @@ class CreatePagosTable extends Migration
             $table->string('boleta');
             $table->date('fecha_cobro');
             $table->string('observacion')->nullable();
-            $table->unsignedBigInteger('inscripcion_id');
-            $table->foreign('inscripcion_id')->references('idInscripcion')->on('inscripciones');
             $table->unsignedBigInteger('postgrado_id');
             $table->foreign('postgrado_id')->references('idPostgrado')->on('postgrados');
             $table->unsignedBigInteger('postgraduante_id');

@@ -1,9 +1,10 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\Postgraduante;
-use Illuminate\Http\Request;
 use Validator;
+use Illuminate\Http\Request;
+use App\Models\Postgraduante;
+use Illuminate\Support\Facades\DB;
 
 class PostgraduanteController extends Controller
 {
@@ -15,7 +16,8 @@ class PostgraduanteController extends Controller
     public function index()
     {
         try {
-            $result = Postgraduante::all();
+            // $result = Postgraduante::all();
+            $result=Postgraduante::select('idPostgraduante',DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"), DB::raw("CONCAT(ci,' ',ci_ext) AS cedula"),'celular','profesion')->get();
             if (!$result->isEmpty()) {
                 return response()->json([
 
@@ -26,11 +28,11 @@ class PostgraduanteController extends Controller
                     'status_code'=>200
                 ]);
             } else {
-                return [
+                return response()->json([
                     'success' => false,
                     'message' => 'No existen resultados',
                     'status_code'=>201
-                ];
+                ],201);
             }
         } catch (\Exception $ex) {
             return response()->json([

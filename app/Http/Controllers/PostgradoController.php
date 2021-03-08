@@ -1,27 +1,20 @@
 <?php
 namespace App\Http\Controllers;
 
-use Validator;
-use App\Models\Materia;
-// use Barryvdh\DomPDF\PDF;
-use PDF;
-use App\Models\Postgrado;
+use App\Models\DocenteMateria;
 use App\Models\Inscripcion;
+// use Barryvdh\DomPDF\PDF;
+use App\Models\Postgrado;
 use Illuminate\Http\Request;
-use App\Models\MateriaPostgrado;
 use Illuminate\Support\Facades\DB;
+use PDF;
+use Validator;
 
 class PostgradoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index()
     {
-        // $articlesConTags = Postgrado::with('materias')->get();
-        // return $articlesConTags;
         try {
             $result = Postgrado::all();
             if (!$result->isEmpty()) {
@@ -31,7 +24,7 @@ class PostgradoController extends Controller
                     'total' => count($result),
                     'message' => 'Lista de postgrados',
                     'status_code' => 200,
-                ]);
+                ], 200);
             } else {
                 return [
                     'success' => false,
@@ -46,12 +39,7 @@ class PostgradoController extends Controller
             ], 404);
         }
     }
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+
     public function store(Request $request)
     {
         try {
@@ -59,7 +47,6 @@ class PostgradoController extends Controller
             $validator = Validator::make($request->all(), [
                 'nombre' => 'required|unique:postgrados',
                 'fecha_inicio' => 'required',
-                'fecha_final' => 'required',
                 'cantidad_pagos' => 'required',
                 'precio' => 'required',
                 'gestion' => 'required',
@@ -72,18 +59,22 @@ class PostgradoController extends Controller
                     'status_code' => 400,
                 ]);
             }
-            $lastIdPostgrado = Postgrado::create(array_merge(
+            Postgrado::create(array_merge(
                 $validator->validated()
-            ))->idPostgrado;
-            $materias = $request['materias'];
-            foreach ($materias as $key => $value) {
-                $lastIdMateria = Materia::create($value)->idMateria;
-                MateriaPostgrado::create([
-                    'materia_id' => $lastIdMateria,
-                    'postgrado_id' => $lastIdPostgrado,
-                ]);
-                DB::commit();
-            }
+            ));
+            DB::commit();
+            // $lastIdPostgrado = Postgrado::create(array_merge(
+            //     $validator->validated()
+            // ))->idPostgrado;
+            // $materias = $request['materias'];
+            // foreach ($materias as $key => $value) {
+            //     $lastIdMateria = Materia::create($value)->idMateria;
+            //     MateriaPostgrado::create([
+            //         'materia_id' => $lastIdMateria,
+            //         'postgrado_id' => $lastIdPostgrado,
+            //     ]);
+            //     DB::commit();
+            // }
             return response()->json([
                 'success' => true,
                 'message' => 'Postgrado registrado correctamente',
@@ -114,12 +105,7 @@ class PostgradoController extends Controller
         //     ], 404);
         // }
     }
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Postgrado  $postgrado
-     * @return \Illuminate\Http\Response
-     */
+
     public function show($id)
     {
         try {
@@ -149,20 +135,13 @@ class PostgradoController extends Controller
             ], 404);
         }
     }
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Postgrado  $postgrado
-     * @return \Illuminate\Http\Response
-     */
+
     public function update(Request $request, $id)
     {
         try {
             $validator = Validator::make($request->all(), [
                 'nombre' => 'required',
                 'fecha_inicio' => 'required',
-                'fecha_final' => 'required',
                 'cantidad_pagos' => 'required',
                 'precio' => 'required',
                 'gestion' => 'required',
@@ -178,7 +157,6 @@ class PostgradoController extends Controller
                 $res_postgrado = [
                     'nombre' => $request['nombre'],
                     'fecha_inicio' => $request['fecha_inicio'],
-                    'fecha_final' => $request['fecha_final'],
                     'cantidad_pagos' => $request['cantidad_pagos'],
                     'precio' => $request['precio'],
                     'gestion' => $request['gestion'],
@@ -188,6 +166,7 @@ class PostgradoController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Postgrado Actualizado correctamente',
+
                 ], 201);
             }
         } catch (\Exception $ex) {
@@ -197,12 +176,7 @@ class PostgradoController extends Controller
             ], 404);
         }
     }
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Postgrado  $postgrado
-     * @return \Illuminate\Http\Response
-     */
+
     public function destroy($id)
     {
         try {
@@ -222,13 +196,30 @@ class PostgradoController extends Controller
     public function postgrado_postgraduantes($idPostgrado)
     {
         $resultado = Inscripcion::select('postgraduantes.idPostgraduante', DB::raw("CONCAT(postgraduantes.paterno,' ',postgraduantes.materno,' ',postgraduantes.nombres) AS full_name"), DB::raw("CONCAT(postgraduantes.ci,'-',postgraduantes.ci_ext) AS cedula "), 'postgraduantes.celular', 'postgraduantes.profesion')->where('postgrado_id', '=', $idPostgrado)->join('postgraduantes', 'postgraduantes.idPostgraduante', '=', 'inscripciones.postgraduante_id')->get();
-        return $resultado;
+        return response()->json([
+            'data' => $resultado,
+            'success' => true,
+            'total' => count($resultado),
+            'message' => 'Lista de postgraduantes de Postgrado',
+            'status_code' => 200,
+        ], 200);
+    }
+    public function postgrado_docentes($idPostgrado)
+    {
+        $resultado = DocenteMateria::select(DB::raw("CONCAT(IFNULL(usuarios.paterno,''),' ',IFNULL(usuarios.materno,''),' ',IFNULL(usuarios.nombres,'')) AS full_name"), 'usuarios.idUsuario', 'usuarios.profesion','materias.idMateria','materias.nombre','materias.sigla')->join('usuarios', 'docente_materia.docente_id', '=', 'usuarios.idUsuario')->join('materias', 'docente_materia.materia_id', '=', 'materias.idMateria')->where('docente_materia.postgrado_id', '=', $idPostgrado)->get();
+        return response()->json([
+            'data' => $resultado,
+            'success' => true,
+            'total' => count($resultado),
+            'message' => 'Lista de Docentes de Postgrado',
+            'status_code' => 200,
+        ], 200);
     }
 
     public function calificacionesAsignatura()
     {
         try {
-            $result=Postgrado::all();
+            $result = Postgrado::all();
             // return  view('reporte_calificaciones_general', ['postgrados'=>$result]);
             $pdf = PDF::loadView('reporte_calificaciones_asignatura', array('postgrados' => $result));
             return $pdf->stream('calificaciones_asignatura.pdf');
@@ -245,7 +236,7 @@ class PostgradoController extends Controller
     public function calificacionesPersonal()
     {
         try {
-            $result=Postgrado::all();
+            $result = Postgrado::all();
             // return  view('reporte_calificaciones_general', ['postgrados'=>$result]);
             $pdf = PDF::loadView('reporte_calificaciones_personal', array('postgrados' => $result));
             return $pdf->stream('calificaciones_personal.pdf');
@@ -262,7 +253,7 @@ class PostgradoController extends Controller
     public function pagosGeneral()
     {
         try {
-            $result=Postgrado::all();
+            $result = Postgrado::all();
             // return  view('reporte_calificaciones_general', ['postgrados'=>$result]);
             $pdf = PDF::loadView('reporte_pagos_general', array('postgrados' => $result));
             $pdf->setPaper('legal', 'landscape');
@@ -280,7 +271,7 @@ class PostgradoController extends Controller
     public function pagosPersonal()
     {
         try {
-            $result=Postgrado::all();
+            $result = Postgrado::all();
             // return  view('reporte_calificaciones_general', ['postgrados'=>$result]);
             $pdf = PDF::loadView('reporte_pagos_personal', array('postgrados' => $result));
             return $pdf->stream('pagos_postgraduante.pdf');

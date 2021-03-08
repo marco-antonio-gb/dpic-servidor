@@ -13,7 +13,6 @@ $cargo="DIRECTOR DPIC";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" href="{{ asset('/css/pdf_landscape.css') }}" media="all" />
-   
     <title>Reporte de Calificaciones</title>
 </head>
 <body>
@@ -26,20 +25,13 @@ $cargo="DIRECTOR DPIC";
             $x = ($pdf->get_width() - $width) - 20;
             $y = $pdf->get_height() - 27;
             $pdf->page_text($x, $y, $text, $font, $size);
-
             $text2 ="Fecha y Hora:".' '. date('d/m/Y h:i:s a');
             $width = $fontMetrics->get_text_width($text2, $font, $size) / 2;
             $x2 = ($pdf->get_width() - $width) - ($pdf->get_width()-115);
-          
             $pdf->page_text($x2, $y, $text2, $font, $size);
-
             $x3 = ($pdf->get_width() - $width) /2;
-            
-
             $text3 = "http://dpic.fni.edu.bo/";
             $pdf->page_text($x3, $y, $text3, $font, $size);
-
-
         }
     </script>
     <div >
@@ -64,11 +56,9 @@ $cargo="DIRECTOR DPIC";
                 <td colspan="3" class="text-center "> 
                     <h1 class="titulo-pagina-land p-0 m-0">{{$title_page}}</h1>
                     <small>Reporte detallado de todos los pagos realizados en el desarrollo del programa de postgrado</small>
-                    
                 </td>
             </tr>
         </table>
-         
     </div>
     <div>
         <!-- <br>
@@ -101,7 +91,6 @@ $cargo="DIRECTOR DPIC";
                 <th>6erPago</th>
                 <th>Boleta</th>
                 <th>Fecha</th>
-                
               </tr>
             </thead>
             <tbody>
@@ -130,7 +119,6 @@ $cargo="DIRECTOR DPIC";
                 <td class="text-center ">1280425</td>
                 <td class="text-center ">2016-12-12</td>
               </tr>
-               
             </tbody>
             </table>
             <small class="small-text">Los pagos son expresados en pesos Bolivianos (Bs.) </small>

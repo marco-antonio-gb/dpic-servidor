@@ -21,7 +21,7 @@ class CreateUsersTable extends Migration
             $table->string('ci')->unique();
             $table->string('ci_ext');
             $table->string('profesion');
-            $table->string('titulo_abrv');
+        
             $table->string('celular')->nullable();
             $table->string('telefono')->nullable();
             $table->boolean('activo')->default(true);
