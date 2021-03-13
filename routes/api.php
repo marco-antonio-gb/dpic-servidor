@@ -37,8 +37,7 @@ Route::group(['middleware' => ['jwt.verify']], function () {
     Route::Apiresource('requisitos', RequisitoController::class, ['except' => ['create', 'edit']]);
 /*----- PAGOS -------*/
     Route::Apiresource('pagos', PagoController::class, ['except' => ['create', 'edit']]);
-/*----- PAGOS -------*/
-    Route::get('/pagos-postgrados/{idPostgrado}', 'PagoController@pagosPostgrados');
+
 /*----- NIVELES -------*/
     Route::Apiresource('niveles', NivelController::class, ['except' => ['create', 'edit']]);
 /*----- MATERIAS -------*/
@@ -50,7 +49,10 @@ Route::group(['middleware' => ['jwt.verify']], function () {
 
 /**-------GENERAR PDF */
 });
-Route::get('/reporte-calificaciones-asignatura', 'PostgradoController@calificacionesAsignatura');
-Route::get('/reporte-calificaciones-personal', 'PostgradoController@calificacionesPersonal');
-Route::get('/reporte-pagos-general', 'PostgradoController@pagosGeneral');
-Route::get('/reporte-pagos-personal/{idPostgrado}/{idPostgraduante}', 'PostgradoController@pagosPersonal');
+/*----- PAGOS -------*/
+Route::get('/pagos-postgrados/{idPostgrado}', 'ReporteController@pagosPostgrados');
+Route::get('/reporte-calificaciones-asignatura', 'ReporteController@calificacionesAsignatura');
+Route::get('/reporte-calificaciones-personal', 'ReporteController@calificacionesPersonal');
+// Route::get('/reporte-pagos-general', 'ReporteController@pagosGeneral');
+Route::get('/reporte-pagos-general/{idPostgrado}/{idPostgraduante}', 'ReporteController@pagosGeneral');
+Route::get('/reporte-pagos-personal/{idPostgrado}/{idPostgraduante}', 'ReporteController@pagosPersonal');

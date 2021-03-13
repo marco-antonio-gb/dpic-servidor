@@ -6,6 +6,7 @@ class Pago extends Model
 {
     protected $table = 'pagos';
     protected $primaryKey = 'idPago';
+    
     protected $fillable = [
         'item',
         'costo_unitario',

@@ -32,7 +32,10 @@ table th {
 	text-align: center;
 	color: black;
 }
- 
+table tr td{
+    /* max-width:100%; */
+    white-space: nowrap;
+}
 .text-center {
 	text-align: center !important;
 }
@@ -175,4 +178,7 @@ margin-top: 8rem;
 .small-text{
 	font-style: italic;
 	color: #525252;
+}
+small{
+	font-size: 8pt !important;
 }

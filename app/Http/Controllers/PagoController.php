@@ -204,33 +204,5 @@ class PagoController extends Controller
 
     // ********************************************************************************
     # RETORNA LOS PAGOS POR POSTGRADOS
-    public function pagosPostgrados($idPostgrado){
-        try {
-            $result = Pago::select('idPago','boleta','costo_unitario','item','fecha_cobro','idPostgraduante',DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"),'ci')
-            ->join('postgraduantes','pagos.postgraduante_id','=','postgraduantes.idPostgraduante')
-            // ->join('postgrados','pagos.postgrado_id','=','postgrados.idPostgrado')
-            ->where('pagos.postgrado_id','=',$idPostgrado)
-            ->get();
-            if (!$result->isEmpty()) {
-                return response()->json([
-                    'data' => $result,
-                    'success' => true,
-                    'total' =>  number_format($result->sum('costo_unitario'), 2, ',', '.').'[Bs.]',
-                    'message' => 'Lista de Pagos',
-                    'status_code' => 200,
-                ]);
-            } else {
-                return [
-                    'success' => false,
-                    'message' => 'No existen resultados',
-                    'status_code' => 201,
-                ];
-            }
-        } catch (\Exception $ex) {
-            return response()->json([
-                'success' => false,
-                'message' => $ex->getMessage(),
-            ], 404);
-        }
-    }
+  
 }

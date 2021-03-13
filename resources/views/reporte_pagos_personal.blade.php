@@ -1,13 +1,13 @@
 <?php
-$titulo_pagina = 'Reporte personal de pagos';
+#info pagina
+$titulo_pagina = 'REPORTE PERSONAL DE PAGOS';
 $subtitulo_pagina = 'Reporte detallado de todos los pagos realizados por el postgraduante';
 
-
+#variables reportes
 $postgraduante = $pagos_personal_pdf['postgraduante'];
-$curso_postgrad = $pagos_personal_pdf['postgrado'];
+$curso_postgrado = $pagos_personal_pdf['postgrado'];
 $pagos = $pagos_personal_pdf['pagos'];
-$firma_docente = 'Dr. Ing. Roberto Del Barco Gamarra';
-$cargo = 'DIRECTOR DPIC';
+ 
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -18,8 +18,6 @@ $cargo = 'DIRECTOR DPIC';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" href="{{ asset('/css/pdf.css') }}" media="all" />
-    {{-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"> --}}
     <title>Reporte de Calificaciones</title>
 </head>
 
@@ -44,39 +42,13 @@ $cargo = 'DIRECTOR DPIC';
         }
     </script>
     <div>
-        <table class="table-borderless">
-            <tr class="mb-2">
-                <td class="text-left">
-                    <img src="{{ asset('/img/uto_logo.png') }}" alt="LOGO UTO" class="logo">
-                </td>
-                <td class="text-center">
-                    <div class="title-container">
-                        <p class="m-0">Universidad Técnica de Oruro</p>
-                        <p class="m-0"> Facultad Nacional de Ingeniería</p>
-                        <p class="m-0">Dirección de Postgrado e Investigación Científica (DPIC)</p>
-                    </div>
-                </td>
-                <td class="text-right">
-                    <img src="{{ asset('/img/fni_logo.png') }}" alt="LOGO UTO" class="logo">
-                </td>
-            </tr>
-            <tr>
-                <td colspan="3"> <br> </td>
-            </tr>
-            <tr>
-                <td colspan="3" class="text-center ">
-                    <h1 class="titulo-pagina p-0 m-0">{{ $titulo_pagina }}</h1>
-                    <small>{{ $subtitulo_pagina }}</small>
-                    {{-- <hr> --}}
-                </td>
-            </tr>
-        </table>
+        @include('header')
     </div>
     <div>
         <br>
         <p class="p-0 m-0"><strong>POSTGRADUANTE: </strong> {{ $postgraduante }}</p>
         <p class="m-0 p-0" style="margin-bottom: 5px !important"><strong>PROGRAMA DE POSTGRADO: </strong>
-            {{ $curso_postgrad }}
+            {{ $curso_postgrado }}
         </p>
         
            
@@ -105,10 +77,7 @@ $cargo = 'DIRECTOR DPIC';
           </tbody>
         </table>
         <small class="small-text">Los pagos son expresados en pesos Bolivianos (Bs.) </small>
-        <div class="text-center mt-8">
-            <hr class="new3">
-            <strong>{{ $firma_docente }} <br> {{ $cargo }}</strong>
-        </div>
+        @include('footer')
     </div>
 </body>
 
