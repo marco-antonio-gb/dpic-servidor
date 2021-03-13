@@ -16,6 +16,7 @@ class CreateInscripcionsTable extends Migration
         Schema::create('inscripciones', function (Blueprint $table) {
             $table->id('idInscripcion');
             $table->string('gestion');
+            $table->timestamp('fecha_registro')->useCurrent = true;
             $table->unsignedBigInteger('postgrado_id');
             $table->foreign('postgrado_id')->references('idPostgrado')->on('postgrados');
             $table->unsignedBigInteger('postgraduante_id');

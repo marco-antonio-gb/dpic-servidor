@@ -52,11 +52,13 @@ class InscripcionController extends Controller
     public function store(Request $request)
     {
         $plan_pagos = $request['pagos'];
+        $postgrado_id=$request['postgrado_id'];
         try {
+            DB::beginTransaction();
             $validator = Validator::make($request['postgraduante'], [
                 'ci' => 'required|unique:postgraduantes',
                 'celular' => 'required',
-                'correo' => 'required|unique:postgraduantes',
+                'correo' => 'required|unique:postgraduantes|email',
                 'nombres' => 'required',
             ]);
             if ($validator->fails()) {
@@ -81,7 +83,8 @@ class InscripcionController extends Controller
                 $lastId = Postgraduante::create($res_postgraduante)->idPostgraduante;
                 $res_inscripcion=[
                     'gestion'=>$request['gestion'],
-                    'postgrado_id' =>$request['postgrado']['postgrado_id'],
+                    // 'fecha_registro'=>$request['fecha_registro'],
+                    'postgrado_id' =>$postgrado_id,
                     'postgraduante_id' =>$lastId
                  ];
                 $lastInscripcion=Inscripcion::create($res_inscripcion)->idInscripcion;
@@ -93,13 +96,13 @@ class InscripcionController extends Controller
                             'boleta' => $pago['boleta'],
                             'fecha_cobro' => date('Y-m-d H:i:s'),
                             'observacion' => $pago['observacion'],
-                            'inscripcion_id' => $lastInscripcion,
-                            'postgrado_id' => $request['postgrado']['postgrado_id'],
+                            'postgrado_id' => $postgrado_id,
                             'postgraduante_id' => $lastId
                         ];
                         Pago::create($res_pagos);
                     }
                 }
+                DB::commit();
                 return response()->json([
                     'success' => true,
                     'message' => 'Inscripcion registrado correctamente',
@@ -107,6 +110,7 @@ class InscripcionController extends Controller
                 ], 201);
             }
         } catch (\Exception $ex) {
+            DB::rollback();
             return response()->json([
                 'success' => false,
                 'message' => $ex->getMessage(),
@@ -124,5 +128,49 @@ class InscripcionController extends Controller
     public function destroy(Inscripcion $inscripcion)
     {
         //
+    }
+
+
+    // CUSTOMS FUNCTIONSSSSSSSSSSSSSSS*************************
+    public function storeexists(Request $request){
+        $plan_pagos = $request['pagos'];
+        $postgrado_id=$request['postgrado_id'];
+        $postgraduante_id=$request['postgraduante_id'];
+        try {
+            DB::beginTransaction();
+            $res_inscripcion=[
+                'gestion'=>$request['gestion'],
+                // 'fecha_registro'=>$request['fecha_registro'],
+                'postgrado_id' =>$postgrado_id,
+                'postgraduante_id' =>$postgraduante_id
+             ];
+            $lastInscripcion=Inscripcion::create($res_inscripcion)->idInscripcion;
+            if (sizeof($plan_pagos) > 0) {
+                foreach ($plan_pagos as $pago) {
+                    $res_pagos = [
+                        'item' => $pago['item'],
+                        'costo_unitario' => $pago['costo_unitario'],
+                        'boleta' => $pago['boleta'],
+                        'fecha_cobro' => date('Y-m-d H:i:s'),
+                        'observacion' => $pago['observacion'],
+                        'postgrado_id' => $postgrado_id,
+                        'postgraduante_id' => $postgraduante_id
+                    ];
+                    Pago::create($res_pagos);
+                }
+            }
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Inscripcion registrado correctamente',
+                'status_code' => 201,
+            ], 201);
+        } catch (\Exception $ex) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => $ex->getMessage(),
+            ], 404);
+        }
     }
 }

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Pago;
 use App\Rules\ValidPago;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
 use Validator;
 
 class PagoController extends Controller
@@ -49,30 +51,50 @@ class PagoController extends Controller
      */
     public function store(Request $request)
     {
+        // return $request;
         try {
-            $validator = Validator::make($request->all(), [
-                'item' => 'required',
-                'costo_unitario' => new ValidPago,
-                'boleta' => 'required|unique:pagos',
-                'fecha_cobro' => 'required',
-                
-                'postgrado_id' => 'required',
-                'postgraduante_id' => 'required',
-            ]);
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'validator' => $validator->errors()->all(),
-                    'status_code' => 400,
+            foreach ($request['pagos'] as $key => $value) {
+                Pago::create([
+                    'item'=>$value['item'],
+                    'costo_unitario'=>$value['costo_unitario'],
+                    'boleta'=>$value['boleta'],
+                    'postgrado_id'=>$request['postgrado_id'],
+                    'postgraduante_id'=>$request['postgraduante_id']
                 ]);
-            } else {
-                Pago::create($request->all());
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Pago registrado correctamente',
-                    'status_code' => 201,
-                ], 201);
             }
+            return response()->json([
+                'success' => true,
+                'message' => 'Pago registrado correctamente',
+                'status_code' => 201,
+            ], 201);
+            // $validator = Validator::make($request['pagos'], [
+            //     'item' => 'required',
+            //     'costo_unitario' => new ValidPago,
+            //     'boleta' => 'required|unique:pagos',
+          
+            // ]);
+            // if ($validator->fails()) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'validator' => $validator->errors()->all(),
+            //         'status_code' => 400,
+            //     ]);
+            // } else {
+            //     foreach ($request['pagos'] as $key => $value) {
+            //         Pago::create([
+            //             'item'=>$value['item'],
+            //             'costo_unitario'=>$value['costo_unitario'],
+            //             'boleta'=>$value['boleta'],
+            //             'postgrado_id'=>$request['postgrado_id'],
+            //             'postgraduante_id'=>$request['postgraduante_id']
+            //         ]);
+            //     }
+            //     return response()->json([
+            //         'success' => true,
+            //         'message' => 'Pago registrado correctamente',
+            //         'status_code' => 201,
+            //     ], 201);
+            // }
         } catch (\Exception $ex) {
             return response()->json([
                 'success' => false,
@@ -172,6 +194,38 @@ class PagoController extends Controller
                 'success' => true,
                 'message' => 'Pago eliminado correctamente',
             ], 201);
+        } catch (\Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => $ex->getMessage(),
+            ], 404);
+        }
+    }
+
+    // ********************************************************************************
+    # RETORNA LOS PAGOS POR POSTGRADOS
+    public function pagosPostgrados($idPostgrado){
+        try {
+            $result = Pago::select('idPago','boleta','costo_unitario','item','fecha_cobro','idPostgraduante',DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"),'ci')
+            ->join('postgraduantes','pagos.postgraduante_id','=','postgraduantes.idPostgraduante')
+            // ->join('postgrados','pagos.postgrado_id','=','postgrados.idPostgrado')
+            ->where('pagos.postgrado_id','=',$idPostgrado)
+            ->get();
+            if (!$result->isEmpty()) {
+                return response()->json([
+                    'data' => $result,
+                    'success' => true,
+                    'total' =>  number_format($result->sum('costo_unitario'), 2, ',', '.').'[Bs.]',
+                    'message' => 'Lista de Pagos',
+                    'status_code' => 200,
+                ]);
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'No existen resultados',
+                    'status_code' => 201,
+                ];
+            }
         } catch (\Exception $ex) {
             return response()->json([
                 'success' => false,

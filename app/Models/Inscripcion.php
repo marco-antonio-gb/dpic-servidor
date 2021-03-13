@@ -13,6 +13,7 @@ class Inscripcion extends Model
     protected $primaryKey="idInscripcion";
     protected $fillable=[
             'gestion',
+            'fecha_registro',
             'postgrado_id',
             'postgraduante_id',
     ];

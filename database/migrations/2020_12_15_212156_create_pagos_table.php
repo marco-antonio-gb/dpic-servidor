@@ -18,7 +18,7 @@ class CreatePagosTable extends Migration
             $table->string('item');
             $table->integer('costo_unitario');
             $table->string('boleta');
-            $table->date('fecha_cobro');
+            $table->timestamp('fecha_cobro')->useCurrent = true;
             $table->string('observacion')->nullable();
             $table->unsignedBigInteger('postgrado_id');
             $table->foreign('postgrado_id')->references('idPostgrado')->on('postgrados');

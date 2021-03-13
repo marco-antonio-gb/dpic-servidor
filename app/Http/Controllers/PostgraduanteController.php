@@ -1,11 +1,11 @@
 <?php
 namespace App\Http\Controllers;
-
-use Validator;
-use Illuminate\Http\Request;
+use App\Models\Inscripcion;
 use App\Models\Postgraduante;
+use App\Models\Postgrado;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use Validator;
 class PostgraduanteController extends Controller
 {
     /**
@@ -17,22 +17,21 @@ class PostgraduanteController extends Controller
     {
         try {
             // $result = Postgraduante::all();
-            $result=Postgraduante::select('idPostgraduante',DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"), DB::raw("CONCAT(ci,' ',ci_ext) AS cedula"),'celular','profesion')->get();
+            $result = Postgraduante::select('idPostgraduante', DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"), DB::raw("CONCAT(ci,' ',ci_ext) AS cedula"), 'celular', 'profesion')->get();
             if (!$result->isEmpty()) {
                 return response()->json([
-
                     'data' => $result,
                     'success' => true,
-                    'total'=>count($result),
+                    'total' => count($result),
                     'message' => 'Lista de postgraduantes',
-                    'status_code'=>200
+                    'status_code' => 200,
                 ]);
             } else {
                 return response()->json([
                     'success' => false,
                     'message' => 'No existen resultados',
-                    'status_code'=>201
-                ],201);
+                    'status_code' => 201,
+                ], 201);
             }
         } catch (\Exception $ex) {
             return response()->json([
@@ -58,7 +57,6 @@ class PostgraduanteController extends Controller
                 'ci' => 'required|string|max:10|unique:postgraduantes',
                 'ci_ext' => 'required|string|max:15',
                 'celular' => 'required|string|max:9',
-        
                 'profesion' => 'required|string|max:30',
                 'correo' => 'required|string|email|max:100|unique:postgraduantes',
             ]);
@@ -66,23 +64,21 @@ class PostgraduanteController extends Controller
                 return response()->json([
                     'success' => false,
                     'validator' => $validator->errors()->all(),
-                    'status_code'=>400
+                    'status_code' => 400,
                 ]);
             }
             Postgraduante::create($request->all());
             return response()->json([
                 'success' => true,
                 'message' => 'Postgraduante registrado correctamente',
-                'status_code'=>201
+                'status_code' => 201,
             ], 201);
-
         } catch (\Exception $ex) {
             return response()->json([
                 'success' => false,
                 'message' => $ex->getMessage(),
             ], 404);
         }
-
     }
     public function show($id)
     {
@@ -92,13 +88,13 @@ class PostgraduanteController extends Controller
                 return [
                     'success' => true,
                     'data' => $result,
-                    'status_code'=>200
+                    'status_code' => 200,
                 ];
             } else {
                 return [
                     'success' => false,
                     'message' => 'No se encontro ningun registro',
-                    'status_code'=>204
+                    'status_code' => 204,
                 ];
             }
         } catch (\Exception $ex) {
@@ -108,10 +104,8 @@ class PostgraduanteController extends Controller
             ], 404);
         }
     }
-
     public function update(Request $request, $id)
     {
-
         try {
             $validator = Validator::make($request->all(), [
                 'paterno' => 'required|string|between:2,100',
@@ -128,7 +122,7 @@ class PostgraduanteController extends Controller
                 return response()->json([
                     'success' => false,
                     'validator' => $validator->errors()->all(),
-                    'status_code'=>400
+                    'status_code' => 400,
                 ]);
             }
             $res_postgraduante = [
@@ -154,18 +148,53 @@ class PostgraduanteController extends Controller
                 'message' => $ex->getMessage(),
             ], 404);
         }
-
     }
-
     public function destroy($id)
     {
         try {
-
             Postgraduante::where('idPostgraduante', '=', $id)->delete();
             return response()->json([
                 'success' => true,
                 'message' => 'Postgraduante eliminado correctamente',
             ], 201);
+        } catch (\Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => $ex->getMessage(),
+            ], 404);
+        }
+    }
+    // ********************************************************************
+
+    #RETORNA POSTGRADUANTES QUE NO ESTAN REGISTRADOS EN UN CURSO DE POSTGRADO DETERMINADO($idPostgrado)
+    public function getPostgraduantesInscritos($idPostgrado)
+    {
+        try {
+            $current_academic = Postgrado::where('idPostgrado', $idPostgrado)->first();
+            $students = \DB::table('postgraduantes')
+                ->select('idPostgraduante', DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"), DB::raw("CONCAT(ci,' ',ci_ext) AS cedula"), 'celular', 'profesion')
+                ->whereNotExists(function ($query) use ($current_academic) {
+                    $query->select(DB::raw(1))
+                        ->from('inscripciones')
+                        ->whereRaw('postgraduantes.idPostgraduante = inscripciones.postgraduante_id')
+                        ->where('inscripciones.postgrado_id', '=', $current_academic->idPostgrado);
+                })
+                ->get();
+            if (!$students->isEmpty()) {
+                return response()->json([
+                    'data' => $students,
+                    'success' => true,
+                    'total' => count($students),
+                    'message' => 'Lista de postgraduantes',
+                    'status_code' => 200,
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No existen resultados',
+                    'status_code' => 201,
+                ], 201);
+            }
         } catch (\Exception $ex) {
             return response()->json([
                 'success' => false,

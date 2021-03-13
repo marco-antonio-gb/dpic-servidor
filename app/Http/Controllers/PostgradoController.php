@@ -5,6 +5,8 @@ use App\Models\DocenteMateria;
 use App\Models\Inscripcion;
 // use Barryvdh\DomPDF\PDF;
 use App\Models\Postgrado;
+use App\Models\Postgraduante;
+use App\Models\Pago;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use PDF;
@@ -268,13 +270,32 @@ class PostgradoController extends Controller
             ], 404);
         }
     }
-    public function pagosPersonal()
+    public function pagosPersonal($idPostgrado,$idPostgraduante)
     {
+        /* 
+            postgraduante: nombre completo
+            postgrado: nombre
+            pago: item, monto, nro boleta, fecha
+        */
         try {
-            $result = Postgrado::all();
-            // return  view('reporte_calificaciones_general', ['postgrados'=>$result]);
-            $pdf = PDF::loadView('reporte_pagos_personal', array('postgrados' => $result));
-            return $pdf->stream('pagos_postgraduante.pdf');
+            $datetime = date('d/m/Y');
+            $postrado_res=Postgrado::find($idPostgrado);
+            $postraduante_res=Postgraduante::select(DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"))->where('idPostgraduante','=',$idPostgraduante)->get()->first();
+            $pagos_res = Pago::select('idPago','boleta','costo_unitario','item','fecha_cobro')
+            ->join('postgraduantes','pagos.postgraduante_id','=','postgraduantes.idPostgraduante')
+            ->join('postgrados','pagos.postgrado_id','=','postgrados.idPostgrado')
+            ->where('pagos.postgrado_id','=',$idPostgrado)
+            ->where('pagos.postgraduante_id','=',$idPostgraduante)
+            ->get();
+            $reporte_pdf=[
+                'postgraduante'=>$postraduante_res->full_name,
+                'postgrado'=>$postrado_res->nombre,
+                'pagos'=>$pagos_res
+            ];
+            // return $reporte_pdf;
+            // return  view('reporte_pagos_personal', ['postgrados'=>$result]);
+            $pdf = PDF::loadView('reporte_pagos_personal', array('pagos_personal_pdf' => $reporte_pdf));
+            return $pdf->stream($postraduante_res->full_name.'REPORTE PAGOS'.$datetime.'.pdf');
 
         } catch (Exception $ex) {
             return response()->json([
