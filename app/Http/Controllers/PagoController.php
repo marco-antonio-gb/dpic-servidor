@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use Validator;
 use App\Models\Pago;
 use App\Rules\ValidPago;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Models\Postgrado;
 
-use Validator;
+use Illuminate\Http\Request;
+use App\Models\Postgraduante;
+use Illuminate\Support\Facades\DB;
 
 class PagoController extends Controller
 {
@@ -204,5 +206,53 @@ class PagoController extends Controller
 
     // ********************************************************************************
     # RETORNA LOS PAGOS POR POSTGRADOS
-  
+    public function pagosPostgrados($idPostgrado)
+    {
+        try {
+            $datetime = date('d/m/Y');
+            $postrado_res = Postgrado::find($idPostgrado);
+            $postgruantes_pagos = DB::table('pagos')
+                ->select('postgraduante_id')
+                ->groupBy('postgraduante_id')
+                ->get();
+            
+            foreach ($postgruantes_pagos as $pago) {
+                $postraduante_res = Postgraduante::select('idPostgraduante',DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"))->where('idPostgraduante', '=', $pago->postgraduante_id)->get()->first();
+                $pagos_res = Pago::select('idPago', 'boleta', 'costo_unitario', 'item', 'fecha_cobro','postgraduante_id')
+                    ->join('postgraduantes', 'pagos.postgraduante_id', '=', 'postgraduantes.idPostgraduante')
+                    ->join('postgrados', 'pagos.postgrado_id', '=', 'postgrados.idPostgrado')
+                    ->where('pagos.postgrado_id', '=', $idPostgrado)
+                    ->where('pagos.postgraduante_id', '=', $pago->postgraduante_id)
+                    ->get();
+                $reporte_pagos[] = (object) array(
+                    'idPostgraduante' => $postraduante_res->idPostgraduante,
+                    'postgraduante' => $postraduante_res->full_name,
+                    'pagos' => $pagos_res,
+                    'total_pagos' => number_format($pagos_res->sum('costo_unitario'), 2, ',', '.') . '[Bs.]',
+                    'cantidad_pagos' => count($postgruantes_pagos),
+                    'size' => sizeof($pagos_res),
+                );
+            }
+            if (!$postgruantes_pagos->isEmpty()) {
+                 return response()->json([
+                        'success'=>true,
+                        'postgrado'=>$postrado_res->nombre,
+                        'cantidad_pagos'=>$postrado_res->cantidad_pagos,
+                        'pagos_postgrado' => $reporte_pagos,
+                     ]);
+         
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'No existen resultados',
+                    'status_code' => 201,
+                ];
+            }
+        } catch (\Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => $ex->getMessage(),
+            ], 404);
+        }
+    }
 }

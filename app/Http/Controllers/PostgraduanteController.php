@@ -179,13 +179,14 @@ class PostgraduanteController extends Controller
                         ->whereRaw('postgraduantes.idPostgraduante = inscripciones.postgraduante_id')
                         ->where('inscripciones.postgrado_id', '=', $current_academic->idPostgrado);
                 })
+                
                 ->get();
             if (!$students->isEmpty()) {
                 return response()->json([
                     'data' => $students,
                     'success' => true,
                     'total' => count($students),
-                    'message' => 'Lista de postgraduantes',
+                    'message' => 'Lista de postgraduantes sin inscribir',
                     'status_code' => 200,
                 ]);
             } else {

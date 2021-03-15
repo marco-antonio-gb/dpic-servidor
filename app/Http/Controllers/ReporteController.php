@@ -3,17 +3,37 @@ namespace App\Http\Controllers;
 use App\Models\Pago;
 use App\Models\Postgrado;
 use App\Models\Postgraduante;
+use App\Models\Calificacion;
+use App\Models\Materia;
+ 
+use App\Models\Usuario;
 use Illuminate\Support\Facades\DB;
 use PDF;
 class ReporteController extends Controller
 {
-    public function calificacionesAsignatura()
+    public function calificacionesAsignatura($idPostgrado, $idMateria, $idDocente)
     {
         try {
-            $result = Postgrado::all();
-            // return  view('reporte_calificaciones_general', ['postgrados'=>$result]);
-            $pdf = PDF::loadView('reporte_calificaciones_asignatura', array('postgrados' => $result));
-            return $pdf->stream('calificaciones_asignatura.pdf');
+            $materia_res = Materia::find($idMateria);
+            $postgrado_res = Postgrado::find($idPostgrado);
+            $docente = Usuario::select(DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"))->where('idUsuario', '=', $idDocente)->get()->first();
+            $inscripcion_result = Calificacion::select(DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"), 'idCalificacion', 'nota_numerica','nota_literal', 'observacion')
+                ->where('postgrado_id', '=', $idPostgrado)->where('materia_id', '=', $idMateria)
+                ->join('postgraduantes', 'calificaciones.postgraduante_id', '=', 'postgraduantes.idPostgraduante')
+                ->join('materias', 'calificaciones.materia_id', '=', 'materias.idMateria')
+                ->orderBy('full_name', 'asc')
+                ->get();
+            $reporte_pdf = [
+                'materia' => $materia_res,
+                'postgrado' => $postgrado_res->nombre,
+                'docente' => $docente->full_name,
+                'postgrado_id' => $idPostgrado,
+                'materia_id' => $idMateria,
+                'calificaciones' => $inscripcion_result,
+            ];
+            // return $reporte_pdf;
+            $pdf = PDF::loadView('reporte_calificaciones_asignatura', array('calificaciones_asignatura_pdf' => $reporte_pdf));
+            return $pdf->stream($materia_res->nombre . 'REPORTE CALIFICACIONES'  . '.pdf');
         } catch (Exception $ex) {
             return response()->json([
                 'message' => $ex->getMessage(),
@@ -23,13 +43,29 @@ class ReporteController extends Controller
             ], 404);
         }
     }
-    public function calificacionesPersonal()
+    public function calificacionesPersonal($idPostgrado, $idPostgraduante)
     {
         try {
-            $result = Postgrado::all();
-            // return  view('reporte_calificaciones_general', ['postgrados'=>$result]);
-            $pdf = PDF::loadView('reporte_calificaciones_personal', array('postgrados' => $result));
-            return $pdf->stream('calificaciones_personal.pdf');
+            $postgraduante_res = Postgraduante::select(DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"))->where('idPostgraduante', '=', $idPostgraduante)->get()->first();
+            $postgrado_res = Postgrado::find($idPostgrado);
+            
+            $inscripcion_result = Calificacion::select('materias.nombre AS asignatura', 'idCalificacion', 'nota_numerica','nota_literal', 'observacion')
+                ->where('postgrado_id', '=', $idPostgrado)
+                ->where('postgraduante_id', '=', $idPostgraduante)
+                ->join('postgraduantes', 'calificaciones.postgraduante_id', '=', 'postgraduantes.idPostgraduante')
+                ->join('materias', 'calificaciones.materia_id', '=', 'materias.idMateria')
+          
+                ->get();
+            $reporte_pdf = [
+                'postgraduante' => $postgraduante_res->full_name,
+                'postgrado' => $postgrado_res->nombre,
+                'postgrado_gestion' => $postgrado_res->gestion,
+                'cantidad_materias'=>count($inscripcion_result),
+                'calificaciones' => $inscripcion_result
+            ];
+            // return $reporte_pdf;
+            $pdf = PDF::loadView('reporte_calificaciones_personal', array('calificaciones_personal_pdf' => $reporte_pdf));
+            return $pdf->stream($postgraduante_res->full_name . 'REPORTE CALIFICACIONES'  . '.pdf');
         } catch (Exception $ex) {
             return response()->json([
                 'message' => $ex->getMessage(),
@@ -145,9 +181,13 @@ class ReporteController extends Controller
                 //      ]);
             // return  view('reporte_pagos_personal', ['postgrados'=>$result]);
 
+
+
+
                 $pdf = PDF::loadView('reporte_pagos_general', array('pagos_general_pdf' => [
                     'success'=>true,
                     'postgrado'=>$postrado_res->nombre,
+                    'postgrado_gestion'=>$postrado_res->gestion,
                     'cantidad_pagos'=>$postrado_res->cantidad_pagos,
                     'pagos_postgrado' => $reporte_pagos,
                  ]));

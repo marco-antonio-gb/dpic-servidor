@@ -1,7 +1,9 @@
 <?php
  #info pagina
+$postgrado_gestion = $pagos_general_pdf['postgrado_gestion'];
+
 $curso_postgrado = $pagos_general_pdf['postgrado'];
-$titulo_pagina = $curso_postgrado;
+$titulo_pagina =  "PAGOS - ".$curso_postgrado .' / '. $postgrado_gestion;
 $subtitulo_pagina="Reporte detallado de todos los pagos realizados en el desarrollo del programa de postgrado";
 #variables reportes
 $pagos = $pagos_general_pdf['pagos_postgrado'];
@@ -49,7 +51,7 @@ $cantidad_pagos = $pagos_general_pdf['cantidad_pagos'];
                 <tr class="text-center ">
                     <th >Nro.</th>
                     <th >Nombres</th>
-                    @for ($i = 0; $i < $cantidad_pagos-1; $i++)
+                    @for ($i = 0; $i < $cantidad_pagos+1; $i++)
                         @if ($i == 0) <th>Matricula</th>
                     @else
                         <th >{{ $i }}:Pago</th> @endif
@@ -64,13 +66,23 @@ $cantidad_pagos = $pagos_general_pdf['cantidad_pagos'];
               <tr>
                   <td class="text-center">{{ ($key + 1)  }}</td>
                   <td style="width: auto">{{ $pago->postgraduante }}</td>
-                  @foreach ($pago->pagos as $item)
+                  @foreach ($pago->pagos as $key=>$item)
                     <td class="text-center">{{ number_format($item->costo_unitario, 2, '.', ',') }}</td>
                     <td class="text-center">{{ $item->boleta }}</td>
                     <td class="text-center">{{ $item->fecha_cobro }}</td>
+                    
                   @endforeach
+                  @php
+                    $size_of_the_array=($cantidad_pagos-$key)*3;
+                    $some_data=" * ";
+                    $my_array = array_fill(0, $size_of_the_array, $some_data);
+                  @endphp
+                  @foreach ($my_array as $item)
+                      <td class="text-center"><strong>{{$item}}</strong></td>
+                  @endforeach
+                  
               </tr>
-              @endforeach
+              @endforeach !>
           </tbody>
         </table>
         <small class="small-text">Los pagos son expresados en pesos Bolivianos (Bs.) </small>

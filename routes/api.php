@@ -37,6 +37,7 @@ Route::group(['middleware' => ['jwt.verify']], function () {
     Route::Apiresource('requisitos', RequisitoController::class, ['except' => ['create', 'edit']]);
 /*----- PAGOS -------*/
     Route::Apiresource('pagos', PagoController::class, ['except' => ['create', 'edit']]);
+    Route::get('/pagos-postgrados/{idPostgrado}', 'PagoController@pagosPostgrados');
 
 /*----- NIVELES -------*/
     Route::Apiresource('niveles', NivelController::class, ['except' => ['create', 'edit']]);
@@ -44,15 +45,18 @@ Route::group(['middleware' => ['jwt.verify']], function () {
     Route::Apiresource('materias', MateriaController::class, ['except' => ['create', 'edit']]);
 /*----- MATERIAS -------*/
     Route::Apiresource('inscripciones', InscripcionController::class, ['except' => ['create', 'edit']]);
+/*----- CALIFICACIONES -------*/
+    Route::Apiresource('calificaciones', CalificacionController::class, ['except' => ['create', 'edit']]);
+/*----- CALIFICACIONES-MATERIAS -------*/
+    Route::Apiresource('calificaciones', CalificacionController::class, ['except' => ['create', 'edit']]);
     /*----- POSTGRADOS-POSTGRADUANTES -------*/
-    Route::post('/inscripciones-postgraduantes-existente', 'InscripcionController@storeexists');
+    Route::get('/calificaciones-postgrado/{idPostgrado}/{idMateria}/{idDocente}', 'CalificacionController@calificacionesPostgrado');
 
 /**-------GENERAR PDF */
 });
 /*----- PAGOS -------*/
-Route::get('/pagos-postgrados/{idPostgrado}', 'ReporteController@pagosPostgrados');
-Route::get('/reporte-calificaciones-asignatura', 'ReporteController@calificacionesAsignatura');
-Route::get('/reporte-calificaciones-personal', 'ReporteController@calificacionesPersonal');
+Route::get('/reporte-calificaciones-asignatura/{idPostgrado}/{idMateria}/{idDocente}', 'ReporteController@calificacionesAsignatura');
+Route::get('/reporte-calificaciones-personal/{idPostgrado}/{idPostgraduante}', 'ReporteController@calificacionesPersonal');
 // Route::get('/reporte-pagos-general', 'ReporteController@pagosGeneral');
-Route::get('/reporte-pagos-general/{idPostgrado}/{idPostgraduante}', 'ReporteController@pagosGeneral');
+Route::get('/reporte-pagos-general/{idPostgrado}', 'ReporteController@pagosPostgrados');
 Route::get('/reporte-pagos-personal/{idPostgrado}/{idPostgraduante}', 'ReporteController@pagosPersonal');

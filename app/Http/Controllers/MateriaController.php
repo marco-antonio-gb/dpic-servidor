@@ -5,7 +5,6 @@ use App\Models\Materia;
 use Illuminate\Http\Request;
 use App\Models\DocenteMateria;
 use App\Models\MateriaPostgrado;
-
 class MateriaController extends Controller
 {
     /**
@@ -41,10 +40,8 @@ class MateriaController extends Controller
             ], 404);
         }
     }
- 
     public function store(Request $request)
     {
-         
         try {
             $validator = Validator::make($request->all(), [
                 'materias.*.nombre' => 'required | unique:materias',
@@ -71,7 +68,6 @@ class MateriaController extends Controller
                         'materia_id' => $lastIdMateria,
                         'docente_id'=>$value['docente_id'],
                         'postgrado_id' => $idPostgrado,
-                        
                     ]);
                 }
                 return response()->json([
@@ -87,14 +83,11 @@ class MateriaController extends Controller
             ], 404);
         }
     }
- 
     public function show($id)
     {
         try {
             $materia = Materia::where('idMateria', '=', $id)->get()->first();
             // $postgrado = MateriaPostgrado::join('postgrados','materia_postgrado.postgrado_id','=','postgrados.idPostgrado')->where('materia_postgrado.materia_id','=',$id)->get();
-            
-            
             if ($materia ) {
                 return [
                     'success' => true,

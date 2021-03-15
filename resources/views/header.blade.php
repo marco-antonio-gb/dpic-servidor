@@ -5,7 +5,7 @@ $departamento = 'Dirección de Postgrado e Investigación Científica';
 $logo_universidad = 'uto_logo.png';
 $logo_facultad = 'fni_logo.png';
 ?>
-<table class="table-borderless mb-1">
+<table class="table-borderless mb-1  ">
     <tr class="mb-2">
         <td class="text-left">
             <img src="{{ asset('/img/' . $logo_universidad) }}" alt="LOGO UTO" class="logo">

@@ -21,17 +21,31 @@ table {
 }
 table td,
 table th {
-	border: 1px solid rgba(0, 0, 0, 0.50);
+	/* border: 1px solid rgba(0, 0, 0, 0.80); */
+	border: 1px solid rgb(51, 126, 193);
 	text-align: justify;
 	font-size: 8pt !important;
 	vertical-align: middle !important;
-	padding: 5px !important;
+	padding: 3px !important;
+	
 }
  
 table th {
-	background-color: #E1E5E5;
+ 
+	background-color: rgb(51, 126, 193);
 	text-align: center;
-	color: black;
+	color: white;
+	font-size: 7.5pt !important;
+	 
+}
+
+table.table-report tr:nth-child(odd) td{
+	background-color: #fff   !important;
+     
+}
+table.table-report tr:nth-child(even) td{
+	background-color: #fff   !important;
+
 }
  
 .text-center {
@@ -180,3 +194,4 @@ hr.new3 {
 small{
 	font-size: 8pt !important;
 }
+ 

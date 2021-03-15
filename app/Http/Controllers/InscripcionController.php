@@ -1,12 +1,15 @@
 <?php
 namespace App\Http\Controllers;
-use Validator;
-use App\Models\Pago;
-use App\Models\Postgrado;
+
+use App\Models\Calificacion;
 use App\Models\Inscripcion;
-use Illuminate\Http\Request;
+use App\Models\Pago;
 use App\Models\Postgraduante;
+use App\Models\DocenteMateria;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Validator;
+
 class InscripcionController extends Controller
 {
     public function index()
@@ -19,13 +22,13 @@ class InscripcionController extends Controller
                 // $postgrado = Postgrado::select('idPostgrado','nombre')->where('idPostgrado','=',$value['postgrado_id'])->get()->first();
                 // $postgraduante = Postgraduante::select('idPostgraduante',DB::raw("CONCAT(paterno,' ',materno,' ',nombres) AS full_name"),'ci','ci_ext')->where('idPostgraduante','=',$value['postgraduante_id'])->get()->first();
                 // $res_pagos=Pago::where('inscripcion_id','=',$value['idInscripcion'])->get();
-                $resultado=Inscripcion::select('inscripciones.idInscripcion','inscripciones.gestion','postgrados.idPostgrado','postgrados.nombre','postgraduantes.idPostgraduante',DB::raw("CONCAT(postgraduantes.paterno,' ',postgraduantes.materno,' ',postgraduantes.nombres) AS full_name"),'postgraduantes.ci','postgraduantes.ci_ext')->join('postgrados','postgrados.idPostgrado','=','inscripciones.postgrado_id')->join('postgraduantes','postgraduantes.idPostgraduante','=','inscripciones.postgraduante_id')->where('inscripciones.postgrado_id','=',$value['postgrado_id'])->where('inscripciones.postgraduante_id','=',$value['postgraduante_id'])->get()->first();
-                $inscripciones[] =    
+                $resultado = Inscripcion::select('inscripciones.idInscripcion', 'inscripciones.gestion', 'postgrados.idPostgrado', 'postgrados.nombre', 'postgraduantes.idPostgraduante', DB::raw("CONCAT(postgraduantes.paterno,' ',postgraduantes.materno,' ',postgraduantes.nombres) AS full_name"), 'postgraduantes.ci', 'postgraduantes.ci_ext')->join('postgrados', 'postgrados.idPostgrado', '=', 'inscripciones.postgrado_id')->join('postgraduantes', 'postgraduantes.idPostgraduante', '=', 'inscripciones.postgraduante_id')->where('inscripciones.postgrado_id', '=', $value['postgrado_id'])->where('inscripciones.postgraduante_id', '=', $value['postgraduante_id'])->get()->first();
+                $inscripciones[] =
                     $resultado;
-                    // 'Inscripcion' => $value,
-                    // 'Postgrado' => $postgrado,
-                    // 'Postgraduante' => $postgraduante,
-                    // 'Pagos' => $res_pagos,
+                // 'Inscripcion' => $value,
+                // 'Postgrado' => $postgrado,
+                // 'Postgraduante' => $postgraduante,
+                // 'Pagos' => $res_pagos,
             }
             if (!$inscripcion_result->isEmpty()) {
                 return response()->json([
@@ -52,7 +55,7 @@ class InscripcionController extends Controller
     public function store(Request $request)
     {
         $plan_pagos = $request['pagos'];
-        $postgrado_id=$request['postgrado_id'];
+        $postgrado_id = $request['postgrado_id'];
         try {
             DB::beginTransaction();
             $validator = Validator::make($request['postgraduante'], [
@@ -81,13 +84,24 @@ class InscripcionController extends Controller
                     'correo' => $request['postgraduante']['correo'],
                 ];
                 $lastId = Postgraduante::create($res_postgraduante)->idPostgraduante;
-                $res_inscripcion=[
-                    'gestion'=>$request['gestion'],
-                    // 'fecha_registro'=>$request['fecha_registro'],
-                    'postgrado_id' =>$postgrado_id,
-                    'postgraduante_id' =>$lastId
-                 ];
-                $lastInscripcion=Inscripcion::create($res_inscripcion)->idInscripcion;
+                $res_inscripcion = [
+                    'gestion' => $request['gestion'],
+                    'postgrado_id' => $postgrado_id,
+                    'postgraduante_id' => $lastId,
+                ];
+                $lastInscripcion = Inscripcion::create($res_inscripcion)->idInscripcion;
+                $docentes = DocenteMateria::select('materia_id', 'docente_id')->where('postgrado_id', '=', $postgrado_id)->get();
+                foreach ($docentes as $key => $value) {
+                    $calificaciones_res = Calificacion::create([
+                        'nota_numerica' => 0,
+                        'nota_literal' => 'CERO',
+                        'materia_id' => $value->materia_id,
+                        'docente_id' => $value->docente_id,
+                        'postgrado_id' => $postgrado_id,
+                        'postgraduante_id' => $lastId,
+                    ]);
+                }
+
                 if (sizeof($plan_pagos) > 0) {
                     foreach ($plan_pagos as $pago) {
                         $res_pagos = [
@@ -97,7 +111,7 @@ class InscripcionController extends Controller
                             'fecha_cobro' => date('Y-m-d H:i:s'),
                             'observacion' => $pago['observacion'],
                             'postgrado_id' => $postgrado_id,
-                            'postgraduante_id' => $lastId
+                            'postgraduante_id' => $lastId,
                         ];
                         Pago::create($res_pagos);
                     }
@@ -130,21 +144,21 @@ class InscripcionController extends Controller
         //
     }
 
-
     // CUSTOMS FUNCTIONSSSSSSSSSSSSSSS*************************
-    public function storeexists(Request $request){
+    public function storeexists(Request $request)
+    {
         $plan_pagos = $request['pagos'];
-        $postgrado_id=$request['postgrado_id'];
-        $postgraduante_id=$request['postgraduante_id'];
+        $postgrado_id = $request['postgrado_id'];
+        $postgraduante_id = $request['postgraduante_id'];
         try {
             DB::beginTransaction();
-            $res_inscripcion=[
-                'gestion'=>$request['gestion'],
+            $res_inscripcion = [
+                'gestion' => $request['gestion'],
                 // 'fecha_registro'=>$request['fecha_registro'],
-                'postgrado_id' =>$postgrado_id,
-                'postgraduante_id' =>$postgraduante_id
-             ];
-            $lastInscripcion=Inscripcion::create($res_inscripcion)->idInscripcion;
+                'postgrado_id' => $postgrado_id,
+                'postgraduante_id' => $postgraduante_id,
+            ];
+            $lastInscripcion = Inscripcion::create($res_inscripcion)->idInscripcion;
             if (sizeof($plan_pagos) > 0) {
                 foreach ($plan_pagos as $pago) {
                     $res_pagos = [
@@ -154,7 +168,7 @@ class InscripcionController extends Controller
                         'fecha_cobro' => date('Y-m-d H:i:s'),
                         'observacion' => $pago['observacion'],
                         'postgrado_id' => $postgrado_id,
-                        'postgraduante_id' => $postgraduante_id
+                        'postgraduante_id' => $postgraduante_id,
                     ];
                     Pago::create($res_pagos);
                 }

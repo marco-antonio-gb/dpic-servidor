@@ -1,13 +1,13 @@
 <?php
-  #info pagina
-  $titulo_pagina = 'REPORTE PROVISIONAL DE CALIFICACIONES';
-  $subtitulo_pagina = 'Reporte detallado de las calificaciones obtenidas en el curso de postgrado';
-  #Variables reportes
-  $postgraduante = "GUTIERREZ BELTRAN MARCO ANTONIO";
-  $curso_postgrado = "MAESTRIA EN ENERGIA RENOVABLE Y EFICIENCIA ENERGÉTICA";
-  // $postgraduante = $calificaciones_asignatura_pdf['postgraduante'];
-  // $curso_postgrado = $calificaciones_asignatura_pdf['postgrado'];
-  // $calificaciones = $calificaciones_asignatura_pdf['calificaciones'];
+#info pagina
+$postgrado_gestion = $calificaciones_personal_pdf['postgrado_gestion'];
+
+$titulo_pagina = 'REPORTE PROVISIONAL DE CALIFICACIONES'.'  /   '.$postgrado_gestion;
+$subtitulo_pagina = 'Reporte detallado de calificaciones en las asignaturas del curso de postgrado';
+#Variables reportes
+$curso_postgrado = $calificaciones_personal_pdf['postgrado'];
+$postgraduante = $calificaciones_personal_pdf['postgraduante'];
+$calificaciones = $calificaciones_personal_pdf['calificaciones'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,7 +17,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" href="{{ asset('/css/pdf.css') }}" media="all" />
-    <title>Reporte de Calificaciones personales</title>
+    <title>REPORTE PROVISIONAL DE CALIFICACIONES    </title>
 </head>
 <body>
     <script type="text/php">
@@ -39,93 +39,49 @@
             $pdf->page_text($x3, $y, $text3, $font, $size);
         }
     </script>
-    <div >
-      @include('header')
-        
+    <div>
+        @include('header')
     </div>
     <div>
         <br>
-        <p class="p-0 m-0"><strong>POSTGRADUANTE: </strong> {{$postgraduante}}</p>
-        <p class="m-0 p-0" style="margin-bottom: 5px !important"><strong>PROGRAMA DE POSTGRADO: </strong> {{$curso_postgrado}}
+        <p class="p-0 m-0"><strong> Postgraduante:   {{ $postgraduante }}</strong></p>
+        <p class="m-0 p-0" style="margin-bottom: 5px !important"><strong>Programa de postgrado:   {{ $curso_postgrado }}</strong>
         </p>
-        <table>
-            <thead>
-              <tr class="text-center ">
-                <th width="15">NRO</th>
-                <th>NOMBRES ASIGNATURA</th>
-                <th width="50">NOTA FINAL</th>
-                <th width="120">CALIFICACION LITERAL</th>
-                <th width="35">OBSERVACION</th>
-              </tr>
+        <table class="table-report">
+            <thead class="head-style">
+                <tr class="text-center ">
+                    <th width="15">NRO</th>
+                    <th width="auto">NOMBRE COMPLETO</th>
+                    <th width="50">NOTA FINAL</th>
+                    <th width="100">CALIFICACION LITERAL</th>
+                    <th width="40">OBSERVACION</th>
+                </tr>
             </thead>
             <tbody>
-              <tr>
-                <td class="text-center ">1</td>
-                <td>ESTADÍSTICA APLICADA</td>
-                <td class="text-center ">65</td>
-                <td class="text-center ">SESENTA Y CINCO</td>
-                <td class="text-center ">REPROBADO</td>
-              </tr>
-              <tr>
-                <td class="text-center ">2</td>
-                <td>INVESTIGACIÓN DE OPERACIONES</td>
-                <td class="text-center ">65</td>
-                <td class="text-center ">SESENTA Y CINCO</td>
-                <td class="text-center ">REPROBADO</td>
-              </tr>
-              <tr>
-                <td class="text-center ">3</td>
-                <td>FUNDAMENTOS DE ORGANIZACIÓN Y MÉTODOS</td>
-                <td class="text-center ">65</td>
-                <td class="text-center ">SESENTA Y CINCO</td>
-                <td class="text-center ">REPROBADO</td>
-              </tr>
-              <tr>
-                <td class="text-center ">4</td>
-                <td>INGENIERÍA DE MÉTODOS Y PRODUCTIVIDAD</td>
-                <td class="text-center ">65</td>
-                <td class="text-center ">SESENTA Y CINCO</td>
-                <td class="text-center ">REPROBADO</td>
-              </tr>
-              <tr>
-                <td class="text-center ">5</td>
-                <td>SISTEMAS DE CALIDAD Y PRODUCCIÓN ESBELTA</td>
-                <td class="text-center ">65</td>
-                <td class="text-center ">SESENTA Y CINCO</td>
-                <td class="text-center ">REPROBADO</td>
-              </tr>
-              <tr>
-                <td class="text-center ">6</td>
-                <td>SISTEMAS DE PRODUCCIÓN Y OPERACIONES</td>
-                <td class="text-center ">65</td>
-                <td class="text-center ">SESENTA Y CINCO</td>
-                <td class="text-center ">REPROBADO</td>
-              </tr>
-              <tr>
-                <td class="text-center ">7</td>
-                <td>SISTEMAS DE PRODUCCIÓN Y OPERACIONES</td>
-                <td class="text-center ">65</td>
-                <td class="text-center ">SESENTA Y CINCO</td>
-                <td class="text-center ">REPROBADO</td>
-              </tr>
-              <tr>
-                <td class="text-center ">8</td>
-                <td>METODOLOGÍA DE LA INVESTIGACIÓN</td>
-                <td class="text-center ">65</td>
-                <td class="text-center ">SESENTA Y CINCO</td>
-                <td class="text-center ">REPROBADO</td>
-              </tr>
-              <tr>
-                <td class="text-center ">9</td>
-                <td>LOGÍSTICA INTEGRADA</td>
-                <td class="text-center ">65</td>
-                <td class="text-center ">SESENTA Y CINCO</td>
-                <td class="text-center ">REPROBADO</td>
-              </tr>
+                @foreach ($calificaciones as $key => $nota)
+                    <tr>
+                        <td class="text-center">{{ $key + 1 }}</td>
+                        <td>{{ $nota->asignatura }}</td>
+                        <td class="text-center">{{ $nota->nota_numerica }}</td>
+                        <td>
+                            {{ $nota->nota_literal }}
+                            @if ($nota->nota_literal==="" || $nota->nota_literal=null)
+                                <span>CERO</span>
+                            
+                            @endif
+                            </td>
+                        <td>
+                          @if ($nota->nota_numerica <75)
+                              <span>REPROBADO</span>
+                          @else
+                          <span>APROBADO</span>
+                          @endif
+                        </td>
+                    </tr>
+                @endforeach
             </tbody>
-            </table>
-            @include('footer')
-
+        </table>
+        @include('footer')
     </div>
 </body>
 </html>

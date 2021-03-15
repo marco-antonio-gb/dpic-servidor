@@ -232,6 +232,7 @@ return [
         'JWTAuth' => Tymon\JWTAuth\Facades\JWTAuth::class,
         'JWTFactory' => Tymon\JWTAuth\Facades\JWTFactory::class,
         'PDF' => Barryvdh\DomPDF\Facade::class,
+        'UserHelper' => App\Helpers\NumeroLetras::class,
 
     ],
 
