@@ -18,7 +18,7 @@ class CreateCalificacionsTable extends Migration
             $table->integer('nota_numerica')->default(0);
             $table->string('nota_literal')->default("CERO");
             $table->string('observacion')->nullable();
-            $table->date('fecha_registro')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('fecha_registro')->useCurrent = true;
             $table->boolean('estado')->default(false);
             $table->unsignedBigInteger('materia_id');
             $table->foreign('materia_id')->references('idMateria')->on('materias');

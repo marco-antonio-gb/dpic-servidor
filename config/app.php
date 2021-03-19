@@ -163,6 +163,9 @@ return [
         Illuminate\View\ViewServiceProvider::class,
         Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
         Barryvdh\DomPDF\ServiceProvider::class,
+        Spatie\Permission\PermissionServiceProvider::class,
+
+
 
 
         /*

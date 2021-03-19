@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Permiso extends Model
 {
-    protected $table = 'permisos';
-    protected $primaryKey = 'idPermiso';
+    protected $table = 'permissions';
+   
     protected $fillable = [
-        'nombre',
+        'name',
+        'guard_name',
         'descripcion'
     ]; 
-    public $timestamps = false;
+    
 }

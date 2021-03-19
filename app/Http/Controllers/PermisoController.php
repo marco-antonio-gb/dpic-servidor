@@ -1,15 +1,17 @@
 <?php
+/*
+ * Copyright (c) 2021.  modem.ff@gmail.com | Marco Antonio Gutierrez Beltran
+ */
+
 namespace App\Http\Controllers;
+
 use App\Models\Permiso;
 use Illuminate\Http\Request;
 use Validator;
+
 class PermisoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index()
     {
         try {
@@ -36,35 +38,33 @@ class PermisoController extends Controller
             ], 404);
         }
     }
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+
+
     public function store(Request $request)
     {
         try {
-            $validator = Validator::make($request->all(), [
-                'nombre' => 'required',
-                'descripcion' => 'required',
-            ]);
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'validator' => $validator->errors()->all(),
-                    'status_code' => 400,
-                ]);
-            } else {
-                Permiso::create(array_merge(
-                    $validator->validated()
-                ));
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Permiso registrado correctamente',
-                    'status_code' => 201,
-                ], 201);
-            }
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|unique:permissions',
+            'guard_name' => 'required',
+        
+            'descripcion' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'validator' => $validator->errors()->all(),
+                
+            ],400);
+        } else {
+            Permiso::create(array_merge(
+                $validator->validated()
+            ));
+            return response()->json([
+                'success' => true,
+                'message' => 'Permiso registrado correctamente',
+                
+            ], 201);
+        }
         } catch (\Exception $ex) {
             return response()->json([
                 'success' => false,
@@ -72,16 +72,12 @@ class PermisoController extends Controller
             ], 404);
         }
     }
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Permiso  $permiso
-     * @return \Illuminate\Http\Response
-     */
+
+
     public function show($id)
     {
         try {
-            $result = Permiso::where('idPermiso', '=', $id)->get()->first();
+            $result = Permiso::find($id);
             if ($result) {
                 return [
                     'success' => true,
@@ -92,7 +88,7 @@ class PermisoController extends Controller
                 return [
                     'success' => false,
                     'message' => 'No se encontro ningun registro',
-                    'status_code'=>204
+                     
                 ];
             }
         } catch (\Exception $ex) {
@@ -102,18 +98,14 @@ class PermisoController extends Controller
             ], 404);
         }
     }
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Permiso  $permiso
-     * @return \Illuminate\Http\Response
-     */
+
     public function update(Request $request, $id)
     {
+        // return $request;
         try {
             $validator = Validator::make($request->all(), [
-                'nombre' => 'required',
+                'name' => 'required',
+                'guard_name' => 'required',
                 'descripcion' => 'required',
             ]);
             if ($validator->fails()) {
@@ -124,10 +116,11 @@ class PermisoController extends Controller
                 ]);
             } else {
                 $res_rol = [
-                    'nombre' => $request['nombre'],
+                    'name' => $request['name'],
+                    'guard_name' => $request['guard_name'],
                     'descripcion' => $request['descripcion'],
                 ];
-                Permiso::where('idPermiso', '=', $id)->update($res_rol);
+                Permiso::where('id', '=', $id)->update($res_rol);
                 return response()->json([
                     'success' => true,
                     'message' => 'Permiso Actualizado correctamente',
@@ -140,16 +133,12 @@ class PermisoController extends Controller
             ], 404);
         }
     }
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Permiso  $permiso
-     * @return \Illuminate\Http\Response
-     */
+
+
     public function destroy($id)
     {
         try {
-            Permiso::where('idPermiso', '=', $id)->delete();
+            Permiso::where('id', '=', $id)->delete();
             return response()->json([
                 'success' => true,
                 'message' => 'Permiso eliminado correctamente',

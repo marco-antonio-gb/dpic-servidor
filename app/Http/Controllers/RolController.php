@@ -1,32 +1,35 @@
 <?php
+/*
+ * Copyright (c) 2021.  modem.ff@gmail.com | Marco Antonio Gutierrez Beltran
+ */
 namespace App\Http\Controllers;
+
+use Validator;
 use App\Models\Rol;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+
 class RolController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         try {
-            $result = Rol::all();
+            $result = Role::all();
             if (!$result->isEmpty()) {
                 return response()->json([
                     'data' => $result,
                     'success' => true,
-                    'total'=>count($result),
+                    'total' => count($result),
                     'message' => 'Lista de roles',
-                    'status_code'=>200
+                    'status_code' => 200,
                 ]);
             } else {
                 return [
                     'success' => false,
                     'message' => 'No existen resultados',
-                    'status_code'=>201
+                    'status_code' => 201,
                 ];
             }
         } catch (\Exception $ex) {
@@ -36,18 +39,14 @@ class RolController extends Controller
             ], 404);
         }
     }
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
+        DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'nombre' => 'required',
-                'descripcion' => 'required'
+                'name' => 'required|unique:roles,name',
+                'guard_name' => 'required',
+                'descripcion' => 'required',
             ]);
             if ($validator->fails()) {
                 return response()->json([
@@ -55,44 +54,50 @@ class RolController extends Controller
                     'validator' => $validator->errors()->all(),
                     'status_code' => 400,
                 ]);
-            }else{
-                Rol::create(array_merge(
+            } else {
+                $newRole = Role::create(array_merge(
                     $validator->validated()
                 ));
+                $permisos = $request['permisos'];
+                foreach ($permisos as $value) {
+                    $data[] = $value['name'];
+                }
+                $newRole->syncPermissions($data);
+                DB::commit();
                 return response()->json([
                     'success' => true,
                     'message' => 'Rol registrado correctamente',
                     'status_code' => 201,
+                    'datos' => $request['permisos'],
                 ], 201);
             }
         } catch (\Exception $ex) {
+            DB::rollback();
             return response()->json([
                 'success' => false,
                 'message' => $ex->getMessage(),
             ], 404);
         }
     }
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Rol  $rol
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
         try {
-            $result = Rol::where('idRol', '=', $id)->get()->first();
-            if ($result) {
+            $role = Rol::where('id', '=', $id)->get()->first();
+            // $role = Role::find($id);
+            $rolePermissions = Permission::join("role_has_permissions", "role_has_permissions.permission_id", "=", "permissions.id")
+                ->where("role_has_permissions.role_id", $id)
+                ->get();
+            if ($role) {
                 return [
                     'success' => true,
-                    'data' => $result,
-                    'status_code'=>200
+                    'data' => ['rol' => $role, 'permisos' => $rolePermissions],
+                    'status_code' => 200,
                 ];
             } else {
                 return [
                     'success' => false,
                     'message' => 'No se encontro ningun registro',
-                    'status_code'=>204
+                    'status_code' => 204,
                 ];
             }
         } catch (\Exception $ex) {
@@ -102,18 +107,13 @@ class RolController extends Controller
             ], 404);
         }
     }
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Rol  $rol
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
+    
     {
+        
         try {
             $validator = Validator::make($request->all(), [
-                'nombre' => 'required',
+                'name' => 'required',
                 'descripcion' => 'required',
             ]);
             if ($validator->fails()) {
@@ -124,10 +124,19 @@ class RolController extends Controller
                 ]);
             } else {
                 $res_rol = [
-                    'nombre' => $request['nombre'],
+                    'name' => $request['name'],
                     'descripcion' => $request['descripcion'],
                 ];
-                Rol::where('idRol', '=', $id)->update($res_rol);
+                // $role = Role::where('id', '=', $id)->update($res_rol);
+                $role = Role::find($id);
+                $role->name = $request['name'];
+                $role->descripcion = $request['descripcion'];
+                $role->save();
+                $permisos = $request['permisos'];
+                foreach ($permisos as $value) {
+                    $data[] = $value['name'];
+                }
+                $role->syncPermissions($data);
                 return response()->json([
                     'success' => true,
                     'message' => 'Rol Actualizado correctamente',
@@ -140,12 +149,6 @@ class RolController extends Controller
             ], 404);
         }
     }
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Rol  $rol
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         try {
