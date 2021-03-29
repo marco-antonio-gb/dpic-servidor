@@ -1,11 +1,14 @@
 <?php
 namespace App\Http\Controllers;
-use App\Models\Inscripcion;
-use App\Models\Postgraduante;
-use App\Models\Postgrado;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Validator;
+use App\Models\Materia;
+use App\Models\Postgrado;
+use App\Models\Inscripcion;
+use App\Models\Usuario;
+use Illuminate\Http\Request;
+use App\Models\Postgraduante;
+use Illuminate\Support\Facades\DB;
+
 class PostgraduanteController extends Controller
 {
     /**
@@ -203,4 +206,49 @@ class PostgraduanteController extends Controller
             ], 404);
         }
     }
+
+    #retorna postgraduantes inscritos en una determinada MATERIA DE UN POSTGRADO
+    public function getPostgraduantesInscritosMateria($idPostgrado, $idMateria, $idDocente)
+    {
+        try {
+            $postgrado_res = Postgrado::find($idPostgrado);
+            $materia_res=Materia::select('nombre','sigla','credito')->where('idMateria',$idMateria)->first();
+            $docente_res=Usuario::select(DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"))->where('idUsuario','=',$idDocente)->first();
+            $inscritos=Inscripcion::select('idPostgraduante', DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"),'inscripciones.fecha_registro')
+            ->join('materia_postgrado','inscripciones.postgrado_id','=','materia_postgrado.postgrado_id')
+            ->join('postgraduantes','inscripciones.postgraduante_id','=','postgraduantes.idPostgraduante')
+            ->where('materia_postgrado.materia_id','=',$idMateria)
+            ->where('inscripciones.postgrado_id','=',$idPostgrado)->get();
+            
+            $Inscritos_materia = (object) array(
+                'postgrado' => $postgrado_res->nombre,
+                'docente' => $docente_res->full_name,
+                'materia' => $materia_res,
+               
+                'postgraduantes' => $inscritos,
+                
+            );
+            if (!$inscritos->isEmpty()) {
+                return response()->json([
+                    'data' => $Inscritos_materia,
+                    'success' => true,
+                    'total' => count($inscritos),
+                    'message' => 'Lista de postgraduantes inscritos',
+                    'status_code' => 200,
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No existen resultados',
+                    'status_code' => 201,
+                ], 201);
+            }
+        } catch (\Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => $ex->getMessage(),
+            ], 404);
+        }
+    }
 }
+ 

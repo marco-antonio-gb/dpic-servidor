@@ -12,6 +12,13 @@ use Validator;
 class PermisoController extends Controller
 {
 
+    function __construct()
+    {
+         $this->middleware('permission:permiso-list|permiso-create|permiso-edit|permiso-delete', ['only' => ['index','show']]);
+         $this->middleware('permission:permiso-create', ['only' => ['create','store']]);
+         $this->middleware('permission:permiso-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:permiso-delete', ['only' => ['destroy']]);
+    }
     public function index()
     {
         try {

@@ -1,16 +1,12 @@
 <?php
-
 namespace App\Http\Controllers;
-
-use Validator;
 use App\Models\Pago;
-use App\Rules\ValidPago;
 use App\Models\Postgrado;
-
-use Illuminate\Http\Request;
 use App\Models\Postgraduante;
+use App\Rules\ValidPago;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use Validator;
 class PagoController extends Controller
 {
     /**
@@ -44,7 +40,6 @@ class PagoController extends Controller
             ], 404);
         }
     }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -57,11 +52,11 @@ class PagoController extends Controller
         try {
             foreach ($request['pagos'] as $key => $value) {
                 Pago::create([
-                    'item'=>$value['item'],
-                    'costo_unitario'=>$value['costo_unitario'],
-                    'boleta'=>$value['boleta'],
-                    'postgrado_id'=>$request['postgrado_id'],
-                    'postgraduante_id'=>$request['postgraduante_id']
+                    'item' => $value['item'],
+                    'costo_unitario' => $value['costo_unitario'],
+                    'boleta' => $value['boleta'],
+                    'postgrado_id' => $request['postgrado_id'],
+                    'postgraduante_id' => $request['postgraduante_id'],
                 ]);
             }
             return response()->json([
@@ -73,7 +68,6 @@ class PagoController extends Controller
             //     'item' => 'required',
             //     'costo_unitario' => new ValidPago,
             //     'boleta' => 'required|unique:pagos',
-          
             // ]);
             // if ($validator->fails()) {
             //     return response()->json([
@@ -104,7 +98,6 @@ class PagoController extends Controller
             ], 404);
         }
     }
-
     /**
      * Display the specified resource.
      *
@@ -135,7 +128,6 @@ class PagoController extends Controller
             ], 404);
         }
     }
-
     /**
      * Update the specified resource in storage.
      *
@@ -145,6 +137,7 @@ class PagoController extends Controller
      */
     public function update(Request $request, $id)
     {
+        
         try {
             $validator = Validator::make($request->all(), [
                 'item' => 'required',
@@ -165,6 +158,7 @@ class PagoController extends Controller
                     'costo_unitario' => $request['costo_unitario'],
                     'boleta' => $request['boleta'],
                     'fecha_cobro' => $request['fecha_cobro'],
+                    'observacion' => $request['observacion'],
                     'postgrado_id' => $request['postgrado_id'],
                     'postgraduante_id' => $request['postgraduante_id'],
                 ];
@@ -181,7 +175,6 @@ class PagoController extends Controller
             ], 404);
         }
     }
-
     /**
      * Remove the specified resource from storage.
      *
@@ -203,26 +196,24 @@ class PagoController extends Controller
             ], 404);
         }
     }
-
     // ********************************************************************************
     # RETORNA LOS PAGOS POR POSTGRADOS
     public function pagosPostgrados($idPostgrado)
     {
         try {
-            $datetime = date('d/m/Y');
             $postrado_res = Postgrado::find($idPostgrado);
-            $postgruantes_pagos = DB::table('pagos')
-                ->select('postgraduante_id')
+            $postgruantes_pagos = Pago::select('postgraduante_id')
+                ->where('postgrado_id', '=', $idPostgrado)
                 ->groupBy('postgraduante_id')
                 ->get();
-            
+            // return $postgruantes_pagos;
             foreach ($postgruantes_pagos as $pago) {
-                $postraduante_res = Postgraduante::select('idPostgraduante',DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"))->where('idPostgraduante', '=', $pago->postgraduante_id)->get()->first();
-                $pagos_res = Pago::select('idPago', 'boleta', 'costo_unitario', 'item', 'fecha_cobro','postgraduante_id')
+                $postraduante_res = Postgraduante::select('idPostgraduante', DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"))->where('idPostgraduante', '=', $pago->postgraduante_id)->get()->first();
+                $pagos_res = Pago::select('idPago', 'boleta', 'costo_unitario', 'item', 'fecha_cobro', 'postgraduante_id')
                     ->join('postgraduantes', 'pagos.postgraduante_id', '=', 'postgraduantes.idPostgraduante')
                     ->join('postgrados', 'pagos.postgrado_id', '=', 'postgrados.idPostgrado')
                     ->where('pagos.postgrado_id', '=', $idPostgrado)
-                    ->where('pagos.postgraduante_id', '=', $pago->postgraduante_id)
+                    ->where('pagos.postgraduante_id', '=', $postraduante_res->idPostgraduante)
                     ->get();
                 $reporte_pagos[] = (object) array(
                     'idPostgraduante' => $postraduante_res->idPostgraduante,
@@ -234,13 +225,50 @@ class PagoController extends Controller
                 );
             }
             if (!$postgruantes_pagos->isEmpty()) {
-                 return response()->json([
-                        'success'=>true,
-                        'postgrado'=>$postrado_res->nombre,
-                        'cantidad_pagos'=>$postrado_res->cantidad_pagos,
-                        'pagos_postgrado' => $reporte_pagos,
-                     ]);
-         
+                return response()->json([
+                    'success' => true,
+                    'postgrado' => $postrado_res->nombre,
+                    'cantidad_pagos' => $postrado_res->cantidad_pagos,
+                    'pagos_postgrado' => $reporte_pagos,
+                ]);
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'No existen resultados',
+                    'status_code' => 201,
+                ];
+            }
+        } catch (\Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => $ex->getMessage(),
+            ], 404);
+        }
+    }
+    public function verificarPagoPostgraduante($idPostgrado, $idPostgraduante)
+    {
+        try {   $postgrado_res = Postgrado::find($idPostgrado);
+                $postgraduante_res = Postgraduante::select('idPostgraduante', DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"))->where('idPostgraduante', '=', $idPostgraduante)->first();
+                $pagos_res = Pago::select('idPago', 'boleta', 'costo_unitario', 'item', 'fecha_cobro', 'postgraduante_id','observacion')
+                    ->join('postgraduantes', 'pagos.postgraduante_id', '=', 'postgraduantes.idPostgraduante')
+                    ->join('postgrados', 'pagos.postgrado_id', '=', 'postgrados.idPostgrado')
+                    ->where('pagos.postgrado_id', '=', $idPostgrado)
+                    ->where('pagos.postgraduante_id', '=', $idPostgraduante)
+                    ->orderBy('pagos.created_at','desc')
+                    ->get();
+                $reporte_pagos = (object) array(
+                    'postgrado'=>$postgrado_res->nombre,
+                    'postgrado_gestion'=>$postgrado_res->gestion,
+                    'postgraduante'=>$postgraduante_res,
+                    'pagos' => $pagos_res,
+                    'total_pagos' => number_format($pagos_res->sum('costo_unitario'), 2, ',', '.') . '[Bs.]',
+                    'size' => sizeof($pagos_res),
+                );
+            if (!$pagos_res->isEmpty()) {
+                return response()->json([
+                    'success' => true,
+                    'data' => $reporte_pagos,
+                ]);
             } else {
                 return [
                     'success' => false,

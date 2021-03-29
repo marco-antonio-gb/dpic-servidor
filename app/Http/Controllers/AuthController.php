@@ -1,12 +1,9 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Validator;
-
 class AuthController extends Controller
 {
     /**
@@ -18,7 +15,6 @@ class AuthController extends Controller
     {
         $this->middleware('auth:api', ['except' => ['login', 'register']]);
     }
-
     /**
      * Get a JWT via given credentials.
      *
@@ -27,7 +23,6 @@ class AuthController extends Controller
     public function login()
     {
         $credentials = request(['email', 'password']);
-        
         // $verificarEstado = Usuario::select('activo')->where('email', '=', $credentials['email'])->get()->first();
         if (Usuario::where('email', '=', $credentials['email'])->exists()) {
             $verificarEstado = Usuario::select('activo')->where('email', '=', $credentials['email'])->get()->first();
@@ -42,9 +37,6 @@ class AuthController extends Controller
          }else{
             return response()->json(['error' => 'La cuenta no existe'], 401);
          }
-
-         
-        
     }
     // public function login(Request $request)
     // {
@@ -52,11 +44,9 @@ class AuthController extends Controller
     //         'email' => 'required|email',
     //         'password' => 'required|string|min:6',
     //     ]);
-
     //     if ($validator->fails()) {
     //         return response()->json($validator->errors(), 422);
     //     }
-
     //     if (!$token = auth()->attempt($validator->validated())) {
     //         return response()->json([
     //             'success' => false,
@@ -64,10 +54,8 @@ class AuthController extends Controller
     //             'status_code'=>401
     //         ]);
     //     }
-
     //     return $this->createNewToken($token);
     // }
-
     /**
      * Register a User.
      *
@@ -83,22 +71,18 @@ class AuthController extends Controller
     //         'email' => 'required|string|email|max:100|unique:usuarios',
     //         'password' => 'required|string|confirmed|min:6',
     //     ]);
-
     //     if ($validator->fails()) {
     //         return response()->json($validator->errors()->toJson(), 400);
     //     }
-
     //     $user = Usuario::create(array_merge(
     //         $validator->validated(),
     //         ['password' => bcrypt($request->password)]
     //     ));
-
     //     return response()->json([
     //         'message' => 'User successfully registered',
     //         'user' => $user,
     //     ], 201);
     // }
-
     /**
      * Log the user out (Invalidate the token).
      *
@@ -109,7 +93,6 @@ class AuthController extends Controller
         auth('api')->logout();
         return response()->json(['message' => 'Successfully logged out']);
     }
-
     /**
      * Refresh a token.
      *
@@ -119,7 +102,6 @@ class AuthController extends Controller
     {
         return $this->createNewToken(auth()->refresh());
     }
-
     /**
      * Get the authenticated User.
      *
@@ -128,11 +110,31 @@ class AuthController extends Controller
     public function userProfile()
     {
         $id = auth()->user()->idUsuario;
-        $result = Usuario::select('usuarios.nombres','usuarios.idUsuario','tipo_usuarios.nombre AS rol','tipo_usuarios.descripcion')->join('tipo_usuarios','usuarios.tipo_usuario_id','=','tipo_usuarios.idTipoUsuario')->where('idUsuario','=',$id)->get()->first();
-        // return response()->json(auth()->user());
-        return response()->json($result);
+        $result = Usuario::where('idUsuario','=',$id)->select('idUsuario', 'nombres', 'celular', 'email', 'profesion', 'activo', 'activo')->with(array('roles' => function($query) {$query->select('id','name');}))->first();
+        return response()->json([
+            'success'=>true,
+            'data'=>$result,
+            'permisos'=>$this->getAllPermissions($id)
+        ]);
     }
-
+    protected function getAllPermissions($id)
+    {
+        try {
+            $user=Usuario::find($id);
+            if ($user) {
+                $permisos = $user->getPermissionsViaRoles()->pluck('name');
+                if($permisos->isEmpty()){
+                    return "No existen permisos para este usuario";   
+                }else{
+                    return $permisos;
+                }
+            } else {
+                return 'No existen resultados';
+            }
+        } catch (\Exception $ex) {
+            return $ex->getMessage();
+        }
+    }
     /**
      * Get the token array structure.
      *
@@ -148,7 +150,5 @@ class AuthController extends Controller
             // 'user'=>auth()->user()->only(['idUsuario','nombres','tipo_usuario']),
             // 'status_code'=>200
         ]);
-         
     }
-
 }

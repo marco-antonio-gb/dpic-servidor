@@ -13,6 +13,8 @@ use Spatie\Permission\Models\Permission;
 
 class RolController extends Controller
 {
+    
+
     public function index()
     {
         try {

@@ -210,7 +210,9 @@ class PostgradoController extends Controller
     }
     public function postgrado_docentes($idPostgrado)
     {
-        $resultado = DocenteMateria::select(DB::raw("CONCAT(IFNULL(usuarios.paterno,''),' ',IFNULL(usuarios.materno,''),' ',IFNULL(usuarios.nombres,'')) AS full_name"), 'usuarios.idUsuario', 'usuarios.profesion','materias.idMateria','materias.nombre','materias.sigla','materias.credito')->join('usuarios', 'docente_materia.docente_id', '=', 'usuarios.idUsuario')->join('materias', 'docente_materia.materia_id', '=', 'materias.idMateria')->where('docente_materia.postgrado_id', '=', $idPostgrado)->get();
+        $resultado = DocenteMateria::select(DB::raw("CONCAT(IFNULL(usuarios.paterno,''),' ',IFNULL(usuarios.materno,''),' ',IFNULL(usuarios.nombres,'')) AS full_name"), 'usuarios.idUsuario', 'usuarios.profesion','materias.idMateria','materias.nombre','materias.sigla','materias.credito')->join('usuarios', 'docente_materia.docente_id', '=', 'usuarios.idUsuario')->join('materias', 'docente_materia.materia_id', '=', 'materias.idMateria')->where('docente_materia.postgrado_id', '=', $idPostgrado)
+            ->orderby('materias.created_at','asc')
+            ->get();
         return response()->json([
             'data' => $resultado,
             'success' => true,

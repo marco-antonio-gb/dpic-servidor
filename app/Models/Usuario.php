@@ -2,24 +2,24 @@
 
 namespace App\Models;
 
+use DateTimeInterface;
+use Spatie\Permission\Traits\HasRoles;
+use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Tymon\JWTAuth\Contracts\JWTSubject;
-use Spatie\Permission\Traits\HasRoles;
-
 
 class Usuario extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
     use HasRoles;
-
+    // use DateTimeInterface;
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
-    Protected $guard_name ='api'; // added
+    protected $guard_name = 'api'; // added
 
     protected $table = 'usuarios';
     protected $primaryKey = 'idUsuario';
@@ -30,17 +30,21 @@ class Usuario extends Authenticatable implements JWTSubject
         'ci',
         'ci_ext',
         'profesion',
-     
+        'telefono',
         'celular',
         'activo',
-        'tipo_usuario_id',
         'email',
         'password',
         'remenber_token',
 
-
     ];
-    
+
+     
+
+    protected function serializeDate(DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -80,6 +84,5 @@ class Usuario extends Authenticatable implements JWTSubject
     {
         return [];
     }
-
 
 }

@@ -21,13 +21,13 @@ class CreateCalificacionsTable extends Migration
             $table->timestamp('fecha_registro')->useCurrent = true;
             $table->boolean('estado')->default(false);
             $table->unsignedBigInteger('materia_id');
-            $table->foreign('materia_id')->references('idMateria')->on('materias');
+            $table->foreign('materia_id')->references('idMateria')->on('materias')->onDelete('cascade');;
             $table->unsignedBigInteger('docente_id');
-            $table->foreign('docente_id')->references('idUsuario')->on('usuarios');
+            $table->foreign('docente_id')->references('idUsuario')->on('usuarios')->onDelete('cascade');;
             $table->unsignedBigInteger('postgrado_id');
-            $table->foreign('postgrado_id')->references('idPostgrado')->on('postgrados');
+            $table->foreign('postgrado_id')->references('idPostgrado')->on('postgrados')->onDelete('cascade');;
             $table->unsignedBigInteger('postgraduante_id');
-            $table->foreign('postgraduante_id')->references('idPostgraduante')->on('postgraduantes');
+            $table->foreign('postgraduante_id')->references('idPostgraduante')->on('postgraduantes')->onDelete('cascade');;
             $table->timestamps();
 
         });

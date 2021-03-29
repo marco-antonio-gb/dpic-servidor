@@ -9,6 +9,8 @@ use App\Models\Inscripcion;
 
 class Postgraduante extends Model
 {
+    use HasFactory;
+
     protected $table = 'postgraduantes';
     protected $primaryKey = 'idPostgraduante';
     protected $fillable = [

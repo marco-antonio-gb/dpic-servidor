@@ -18,9 +18,9 @@ class CreateInscripcionsTable extends Migration
             $table->string('gestion');
             $table->timestamp('fecha_registro')->useCurrent = true;
             $table->unsignedBigInteger('postgrado_id');
-            $table->foreign('postgrado_id')->references('idPostgrado')->on('postgrados');
+            $table->foreign('postgrado_id')->references('idPostgrado')->on('postgrados')->onDelete('cascade');;
             $table->unsignedBigInteger('postgraduante_id');
-            $table->foreign('postgraduante_id')->references('idPostgraduante')->on('postgraduantes');
+            $table->foreign('postgraduante_id')->references('idPostgraduante')->on('postgraduantes')->onDelete('cascade');;
             $table->timestamps();
         });
     }

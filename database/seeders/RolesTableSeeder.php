@@ -23,7 +23,7 @@ class RolesTableSeeder extends Seeder
             'descripcion'=>"Usuario que podra realizar inscripciones, recepecion de pagos, emision de certificados de pagos concluidos y certificados de calificaciones",
         ]);
         DB::table('roles')->insert([
-            'name'=>"Asistente",
+            'name'=>"Encargado",
             'guard_name'=>"api",
             'descripcion'=>"Usuario con privilegios para emitir unicamente reportes acerca de los pagos, calificaciones y ver postgraduantes inscritos.",
         ]);

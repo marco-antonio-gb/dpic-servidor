@@ -42,4 +42,15 @@ class Handler extends ExceptionHandler
     {
         return response()->json(['error' => 'Unauthenticated.'], 401);
     }
+    public function render($request, Throwable $exception)
+    {
+        if ($exception instanceof \Spatie\Permission\Exceptions\UnauthorizedException) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No tienes los permisos para realizar esta tarea.'
+            ],403);
+        }
+
+        return parent::render($request, $exception);
+    }
 }

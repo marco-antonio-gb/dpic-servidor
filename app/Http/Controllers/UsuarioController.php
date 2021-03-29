@@ -1,10 +1,10 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\Docente;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 use Validator;
 
 class UsuarioController extends Controller
@@ -17,21 +17,18 @@ class UsuarioController extends Controller
     public function index()
     {
         try {
-            
-            $result = Usuario::select('idUsuario', DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"), 'celular', 'email', 'profesion', 'activo', 'activo')->where('tipo_usuario_id', '!=', 2)->get();
-            if (!$result->isEmpty()) {
+            $usuarios_res = Usuario::select('idUsuario', DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',nombres) AS full_name"), 'celular', 'email', 'profesion', 'activo', 'activo')->with(array('roles' => function ($query) {$query->select('id', 'name');}))->whereHas('roles', function ($query) {$query->where('name', '!=', 'Docente');})->get();
+            if (!$usuarios_res->isEmpty()) {
                 return response()->json([
-                    'data' => $result,
+                    'data' => $usuarios_res,
                     'success' => true,
-                    'total' => count($result),
+                    'total' => count($usuarios_res),
                     'message' => 'Lista de usuarios',
-                    'status_code' => 200,
-                ]);
+                ], 200);
             } else {
                 return [
                     'success' => false,
                     'message' => 'No existen resultados',
-                    'status_code' => 204,
                 ];
             }
         } catch (\Exception $ex) {
@@ -41,12 +38,10 @@ class UsuarioController extends Controller
             ], 404);
         }
     }
-
     public function store(Request $request)
     {
-        // return $request;
+        DB::beginTransaction();
         try {
-            $tipo = $request['tipo_usuario'];
             $validator = Validator::make($request->all(), [
                 'paterno' => 'required|string|between:2,100',
                 'materno' => 'required|string|between:2,100',
@@ -55,47 +50,46 @@ class UsuarioController extends Controller
                 'ci_ext' => 'required|string|max:5',
                 'celular' => 'required|string|max:9',
                 'profesion' => 'required|string|max:30',
-                'tipo_usuario_id' => 'required|max:30',
+                'roles' => 'required|max:30',
                 'email' => 'required|string|email|max:100|unique:usuarios',
             ]);
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
                     'validator' => $validator->errors()->all(),
-                    'status_code' => 400,
-                ]);
+                ], 400);
             }
             $user = Usuario::create(array_merge(
                 $validator->validated(),
                 ['password' => bcrypt($request->password)]
             ));
-            $user_id = $user->idUsuario;
-            if ($tipo === 'docente') {
-                $res_docente = [
-                    'usuario_id' => $user_id,
-                ];
-                Docente::save($res_docente);
+            $roles = $request['roles'];
+            foreach ($roles as $value) {
+                $data[] = $value['name'];
             }
+            $user->syncRoles($data);
+            DB::commit();
             return response()->json([
                 'message' => 'Usuario registrado correctamtente',
                 'user' => $user,
             ], 201);
         } catch (\Exception $ex) {
+            DB::rollback();
             return response()->json([
                 'success' => false,
                 'message' => $ex->getMessage(),
             ], 404);
         }
     }
-
     public function show($id)
     {
         try {
-            $result = Usuario::where('idUsuario', '=', $id)->get()->first();
-            if ($result) {
+            $usuarios_res = Usuario::where('idUsuario', $id)->with(array('roles' => function ($query) {$query->select('id', 'name', 'descripcion');}))->first();
+            if ($usuarios_res) {
                 return [
                     'success' => true,
-                    'data' => $result,
+                    'data' => $usuarios_res,
+                    // 'permisos'=>$permissionNames,
                     'status_code' => 200,
                 ];
             } else {
@@ -112,11 +106,11 @@ class UsuarioController extends Controller
             ], 404);
         }
     }
-
     public function update(Request $request, $id)
     {
+        // return $request;
+        DB::beginTransaction();
         try {
-            $tipo = $request['tipo_usuario'];
             $validator = Validator::make($request->all(), [
                 'nombres' => 'required|string|between:2,100',
                 'ci' => 'required|string|max:10',
@@ -139,39 +133,43 @@ class UsuarioController extends Controller
                     'ci' => $request['ci'],
                     'ci_ext' => $request['ci_ext'],
                     'celular' => $request['celular'],
+                    'telefono' => $request['telefono'],
                     'profesion' => $request['profesion'],
                     'email' => $request['email'],
                 ];
-            }
-            Usuario::where('idUsuario', '=', $id)->update($res_usuario);
-            $user_id = $id;
-            if ($tipo === 'docente') {
-                $res_docente = [
-                    'usuario_id' => $user_id,
-                ];
-                Docente::save($res_docente);
+                $user = Usuario::find($id);
+                $user->update($res_usuario);
+                $roles = $request['roles'];
+                foreach ($roles as $value) {
+                    $data[] = $value['name'];
+                }
+                $user->syncRoles($data);
+                DB::commit();
             }
             return response()->json([
                 'success' => true,
                 'message' => 'Usuario Actualizado correctamente',
             ], 201);
         } catch (\Exception $ex) {
+            DB::rollback();
             return response()->json([
                 'success' => false,
                 'message' => $ex->getMessage(),
             ], 404);
         }
     }
-
     public function destroy($id)
     {
+        DB::beginTransaction();
         try {
             Usuario::where('idUsuario', '=', $id)->delete();
+            DB::commit();
             return response()->json([
                 'success' => true,
                 'message' => 'Usuario eliminado correctamente',
             ], 201);
         } catch (\Exception $ex) {
+            DB::rollback();
             return response()->json([
                 'success' => false,
                 'message' => $ex->getMessage(),
@@ -182,15 +180,50 @@ class UsuarioController extends Controller
     public function indexDocentes()
     {
         try {
-            $result = Usuario::select('idUsuario', DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',nombres) AS full_name"), 'celular', 'email', 'profesion', 'activo', 'activo')->where('tipo_usuario_id', '=', 2)->get();
+            $result = Usuario::select('idUsuario', DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',nombres) AS full_name"), 'celular', 'email', 'profesion', 'activo', 'activo')->role('docente')->with(array('roles' => function ($query) {$query->select('id', 'name');}))->get();
             if (!$result->isEmpty()) {
                 return response()->json([
                     'data' => $result,
                     'success' => true,
                     'total' => count($result),
-                    'message' => 'Lista de usuarios',
-                    'status_code' => 200,
-                ]);
+                    'message' => 'Lista de docentes',
+                ], 200);
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'No existen resultados',
+                    'status_code' => 204,
+                ];
+            }
+        } catch (\Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => $ex->getMessage(),
+            ], 404);
+        }
+    }
+    public function getAllPermissions()
+    {
+        
+        try {
+             $id = auth()->user()->idUsuario;
+
+            $user=Usuario::find($id);
+
+            if ($user) {
+                $permisos = $user->getPermissionsViaRoles()->pluck('name');
+                if($permisos->isEmpty()){
+                    return response()->json([
+                        'success' => false,
+                        'message' => "No existen permisos para este usuario",
+                    ], 404);    
+                }else{
+                    return response()->json([
+                        'success' => true,
+                        'data' => $permisos,
+                    ], 200);
+                }
+                
             } else {
                 return [
                     'success' => false,
