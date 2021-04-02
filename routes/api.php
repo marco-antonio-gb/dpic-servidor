@@ -35,6 +35,24 @@ Route::group(['middleware' => ['jwt.verify']], function () {
     Route::get('/permisos-usuario', 'UsuarioController@getAllPermissions');
 /*----- DOCENTES -------*/
     Route::get('/docentes', 'UsuarioController@indexDocentes');
+
+
+#---------------DETALLLES POSTGRADOS
+# RETORNA LISTA DE POSTGRADUANTES INSCRITOS EN UN CURSO DE POSTGRADO
+Route::get('/postgraduantes-inscritos/{idPostgrado}', 'PostgradoController@postgraduantesInscritos');
+# RETORNA TODAS LAS MATERIAS DE UN POSTGRADO + DOCENTES
+Route::get('/materias-postgrado/{idPostgrado}', 'PostgradoController@materiasPostgrado');
+# RETORNA LAS CALIFICACIONES DE LOS POSTGRADUANTES DE UNA MATERIA
+Route::get('/calificaciones-postgrado/{idPostgrado}/{idMateria}/{idDocente}', 'CalificacionController@calificacionesPostgrado');
+# RETORNA LAS CALIFICACIONES DE TODAS LAS MATERIAS DE UN POSTGRADUANTE
+Route::get('/calificaciones-postgraduante/{idPostgrado}/{idPostgraduante}', 'CalificacionController@calificacionesPostgraduante');
+# RETORNA INFORMACION PARA EDITAR CALIFICACION
+Route::get('/editar-calificacion-postgraduante/{idPostgrado}/{idPostgraduante}/{idCalificacion}', 'CalificacionController@editarCalificacionPostgraduante');
+
+
+
+
+
 /*----- POSTGRADUANTES-NO INSCRITOS-POSTGRADO-REGISTRO -------*/
     Route::get('/postgraduantes-inscripciones/{idPostgrado}', 'PostgraduanteController@getPostgraduantesInscritos');
 /*----- POSTGRADUANTES-INSCRITOS-MATERIA-POSTGRADO-REGISTRO -------*/
@@ -43,12 +61,9 @@ Route::group(['middleware' => ['jwt.verify']], function () {
     Route::get('/pagos-postgrados/{idPostgrado}', 'PagoController@pagosPostgrados');
 #RETORNA TODOS LOS PAGOS REALIZADOS POR UN POSTGRADUANTE EN UN CURSO DE POSTGRADO
     Route::get('/verificar-pagos-postgrados-postgraduante/{idPostgrado}/{idPostgraduante}', 'PagoController@verificarPagoPostgraduante');
-/*----- POSTGRADOS-POSTGRADUANTES -------*/
-    Route::get('/postgrados-postgraduantes/{idPostgrado}', 'PostgradoController@postgrado_postgraduantes');
-/*----- POSTGRADOS-DOCENTES -------*/
-    Route::get('/postgrados-docentes/{idPostgrado}', 'PostgradoController@postgrado_docentes');
-/*----- POSTGRADOS-POSTGRADUANTES -------*/
-    Route::get('/calificaciones-postgrado/{idPostgrado}/{idMateria}/{idDocente}', 'CalificacionController@calificacionesPostgrado');
+
+
+
 /* CHANGE PASSWORD */
     Route::post('change-password', 'ChangePasswordController@store')->name('change.password');
 /*----- PAGOS -------*/

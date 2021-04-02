@@ -5,11 +5,8 @@ use App\Models\DocenteMateria;
 use App\Models\Inscripcion;
 // use Barryvdh\DomPDF\PDF;
 use App\Models\Postgrado;
-use App\Models\Postgraduante;
-use App\Models\Pago;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use PDF;
 use Validator;
 
 class PostgradoController extends Controller
@@ -195,32 +192,42 @@ class PostgradoController extends Controller
         }
     }
     // CUSTOM FUNCTIONS ****************************************************************
-    public function postgrado_postgraduantes($idPostgrado)
+    public function postgraduantesInscritos($idPostgrado)
     {
+        $postrado_res = Postgrado::find($idPostgrado);
         $resultado = Inscripcion::select('postgraduantes.idPostgraduante', DB::raw("CONCAT(postgraduantes.paterno,' ',postgraduantes.materno,' ',postgraduantes.nombres) AS full_name"), DB::raw("CONCAT(postgraduantes.ci,'-',postgraduantes.ci_ext) AS cedula "), 'postgraduantes.celular', 'postgraduantes.profesion')->where('postgrado_id', '=', $idPostgrado)->join('postgraduantes', 'postgraduantes.idPostgraduante', '=', 'inscripciones.postgraduante_id')
-        ->orderBy('full_name','asc')
-        ->get();
+            ->orderBy('full_name', 'asc')
+            ->get();
+        $inscritos = (object) array(
+            'postgrado' => $postrado_res->nombre,
+            'postgraduantes' => $resultado,
+        );
         return response()->json([
-            'data' => $resultado,
+
+            'data' => $inscritos,
             'success' => true,
             'total' => count($resultado),
-            'message' => 'Lista de postgraduantes de Postgrado [inscritos]',
+            'message' => 'Lista de postgraduantes [inscritos]',
             'status_code' => 200,
         ], 200);
     }
-    public function postgrado_docentes($idPostgrado)
+    public function materiasPostgrado($idPostgrado)
     {
-        $resultado = DocenteMateria::select(DB::raw("CONCAT(IFNULL(usuarios.paterno,''),' ',IFNULL(usuarios.materno,''),' ',IFNULL(usuarios.nombres,'')) AS full_name"), 'usuarios.idUsuario', 'usuarios.profesion','materias.idMateria','materias.nombre','materias.sigla','materias.credito')->join('usuarios', 'docente_materia.docente_id', '=', 'usuarios.idUsuario')->join('materias', 'docente_materia.materia_id', '=', 'materias.idMateria')->where('docente_materia.postgrado_id', '=', $idPostgrado)
-            ->orderby('materias.created_at','asc')
+        $postrado_res = Postgrado::find($idPostgrado);
+        $resultado = DocenteMateria::select(DB::raw("CONCAT(IFNULL(usuarios.paterno,''),' ',IFNULL(usuarios.materno,''),' ',IFNULL(usuarios.nombres,'')) AS full_name"), 'usuarios.idUsuario', 'usuarios.profesion', 'materias.idMateria', 'materias.nombre', 'materias.sigla', 'materias.credito')->join('usuarios', 'docente_materia.docente_id', '=', 'usuarios.idUsuario')->join('materias', 'docente_materia.materia_id', '=', 'materias.idMateria')->where('docente_materia.postgrado_id', '=', $idPostgrado)
+            ->orderby('materias.created_at', 'asc')
             ->get();
+        $materias = (object) array(
+            'postgrado' => $postrado_res->nombre,
+            'materias' => $resultado,
+        );
         return response()->json([
-            'data' => $resultado,
+            'data' => $materias,
             'success' => true,
             'total' => count($resultado),
-            'message' => 'Lista de Docentes de Postgrado',
+            'message' => 'Lista de Materias registradas',
             'status_code' => 200,
         ], 200);
     }
 
-    
 }

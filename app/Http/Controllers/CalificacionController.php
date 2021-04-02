@@ -1,12 +1,14 @@
 <?php
 namespace App\Http\Controllers;
-use App\Models\Calificacion;
-use App\Models\Materia;
-use App\Models\Postgrado;
-use App\Models\Usuario;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use NumeroLetras;
+use Validator;
+use App\Models\Materia;
+use App\Models\Usuario;
+use App\Models\Postgrado;
+use App\Models\Calificacion;
+use Illuminate\Http\Request;
+use App\Models\Postgraduante;
+use Illuminate\Support\Facades\DB;
 class CalificacionController extends Controller
 {
     /**
@@ -70,26 +72,42 @@ class CalificacionController extends Controller
             ], 404);
         }
     }
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Calificacion  $calificacion
-     * @return \Illuminate\Http\Response
-     */
     public function show(Calificacion $calificacion)
     {
         //
     }
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Calificacion  $calificacion
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Calificacion $calificacion)
+    public function update(Request $request, $id)
     {
-        //
+        // return $request;
+        try {
+            $validator = Validator::make($request->all(), [
+                'nota_numerica' => 'required'
+            ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'validator' => $validator->errors()->all(),
+                    'status_code' => 400,
+                ]);
+            } else {
+                $calificacion = [
+                    'nota_numerica'=>$request['nota_numerica'],
+                    'nota_literal'=>NumeroLetras::convertir($request['nota_numerica']),
+                    'observacion'=>$request['observacion'],
+                    'estado'=>1
+                ];
+                Calificacion::where('idCalificacion', '=', $id)->update($calificacion);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Calificacion Actualizado correctamente',
+                ], 201);
+            }
+        } catch (\Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => $ex->getMessage(),
+            ], 404);
+        }
     }
     /**
      * Remove the specified resource from storage.
@@ -127,6 +145,87 @@ class CalificacionController extends Controller
                     'data' => $resultado_calificaciones,
                     'success' => true,
                     'total' => count($inscripcion_result),
+                    'message' => 'Lista de calificaciones',
+                    'status_code' => 200,
+                ]);
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'No existen resultados',
+                    'status_code' => 201,
+                ];
+            }
+        } catch (\Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => $ex->getMessage(),
+            ], 404);
+        }
+    }
+    # RETORNA TODAS LAS CALIFICACIONES DE TODAS LAS MATERIAS DE UN POSTGRADUANTE
+    public function calificacionesPostgraduante($idPostgrado, $idPostgraduante)
+    {
+        try {
+            $postgraduante_res = Postgraduante::select(DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"))->where('idPostgraduante', '=', $idPostgraduante)->get()->first();
+            $postgrado_res = Postgrado::find($idPostgrado);
+            $inscripcion_result = Calificacion::select('materias.sigla','materias.nombre AS asignatura', 'idCalificacion', 'nota_numerica','nota_literal', 'observacion')
+                ->where('postgrado_id', '=', $idPostgrado)
+                ->where('postgraduante_id', '=', $idPostgraduante)
+                ->join('postgraduantes', 'calificaciones.postgraduante_id', '=', 'postgraduantes.idPostgraduante')
+                ->join('materias', 'calificaciones.materia_id', '=', 'materias.idMateria')
+                ->get();
+            $calificaciones = [
+                'postgraduante' => $postgraduante_res->full_name,
+                'postgrado' => $postgrado_res->nombre,
+                'postgrado_gestion' => $postgrado_res->gestion,
+                'cantidad_materias'=>count($inscripcion_result),
+                'calificaciones' => $inscripcion_result
+            ];
+            if (!$inscripcion_result->isEmpty()) {
+                return response()->json([
+                    'data' => $calificaciones,
+                    'success' => true,
+                    'total' => count($inscripcion_result),
+                    'message' => 'Lista de calificaciones',
+                    'status_code' => 200,
+                ]);
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'No existen resultados',
+                    'status_code' => 201,
+                ];
+            }
+        } catch (\Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => $ex->getMessage(),
+            ], 404);
+        }
+    }
+    # RETORNA INFORMACION DE LA CALIFICACION PARA SER EDITADA
+    public function editarCalificacionPostgraduante($idPostgrado,$idPostgraduante,$idCalificacion)
+    {
+        try {
+            $postgraduante_res = Postgraduante::select(DB::raw("CONCAT(IFNULL(paterno,''),' ',IFNULL(materno,''),' ',IFNULL(nombres,'')) AS full_name"))->where('idPostgraduante', '=', $idPostgraduante)->get()->first();
+            $postgrado_res = Postgrado::find($idPostgrado);
+            $inscripcion_result = Calificacion::select('materias.sigla','materias.nombre AS asignatura', 'idCalificacion', 'nota_numerica','fecha_registro', 'observacion')
+                ->where('postgrado_id', '=', $idPostgrado)
+                ->where('postgraduante_id', '=', $idPostgraduante)
+                ->where('idCalificacion', '=', $idCalificacion)
+                ->join('postgraduantes', 'calificaciones.postgraduante_id', '=', 'postgraduantes.idPostgraduante')
+                ->join('materias', 'calificaciones.materia_id', '=', 'materias.idMateria')
+                ->first();
+            $calificaciones = [
+                'postgraduante' => $postgraduante_res->full_name,
+                'postgrado' => $postgrado_res->nombre,
+                'postgrado_gestion' => $postgrado_res->gestion,
+                'calificacion' => $inscripcion_result
+            ];
+            if ($inscripcion_result) {
+                return response()->json([
+                    'data' => $calificaciones,
+                    'success' => true,
                     'message' => 'Lista de calificaciones',
                     'status_code' => 200,
                 ]);

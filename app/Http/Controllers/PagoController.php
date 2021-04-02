@@ -254,15 +254,16 @@ class PagoController extends Controller
                     ->join('postgrados', 'pagos.postgrado_id', '=', 'postgrados.idPostgrado')
                     ->where('pagos.postgrado_id', '=', $idPostgrado)
                     ->where('pagos.postgraduante_id', '=', $idPostgraduante)
-                    ->orderBy('pagos.created_at','desc')
+                    ->orderBy('pagos.created_at','asc')
                     ->get();
                 $reporte_pagos = (object) array(
                     'postgrado'=>$postgrado_res->nombre,
                     'postgrado_gestion'=>$postgrado_res->gestion,
                     'postgraduante'=>$postgraduante_res,
-                    'pagos' => $pagos_res,
-                    'total_pagos' => number_format($pagos_res->sum('costo_unitario'), 2, ',', '.') . '[Bs.]',
-                    'size' => sizeof($pagos_res),
+                    'total_curso'=>$postgrado_res->precio,
+                    'total_pagado' =>$pagos_res->sum('costo_unitario'),
+                    'total_deuda' =>abs(intval($postgrado_res->precio)-intval($pagos_res->sum('costo_unitario'))),
+                    'pagos' => $pagos_res
                 );
             if (!$pagos_res->isEmpty()) {
                 return response()->json([
